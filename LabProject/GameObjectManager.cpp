@@ -6,15 +6,10 @@ CGameObjectManager::CGameObjectManager()
 {
 }
 
-
 CGameObjectManager::~CGameObjectManager()
 {
-	m_plGameObjects.~list();
-	m_plBullets.~list();
-	m_plEnermys.~list();
-	m_plBonusObjects.~list();
-
 }
+
 
 void CGameObjectManager::newBullet(CBullet * pbullet)
 {

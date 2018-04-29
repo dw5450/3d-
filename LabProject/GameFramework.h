@@ -36,6 +36,7 @@ private:
 	HBITMAP						m_hBitmapFrameBuffer = NULL;
 
 	CPlayer						*m_pPlayer = NULL;
+	bool						bShotBullet = false;
 
 	CScene						*m_pScene = NULL;
 

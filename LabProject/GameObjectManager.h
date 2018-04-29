@@ -16,7 +16,7 @@ private:
 
 public:
 	//오브젝트를 추가하는 함수
-	void newBullet(CBullet *);
+	void newBullet(CBullet * pbullet);
 	void newEnermy(CEnermy *);
 	void newBounusObject(CBonusObject *);
 
@@ -26,7 +26,6 @@ public:
 	void deleteBonusObject(std::shared_ptr<CBonusObject>);
 
 public:
-
 	//리스트를 가져오는 함수
 	std::list<std::shared_ptr<CGameObject>> & GetplGameObjects();
 	std::list<std::shared_ptr<CBullet>> & GetplBullets();

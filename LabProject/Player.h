@@ -26,7 +26,6 @@ public:
 
 	bool						m_bShotedBullet = false;
 	float						m_fBulletCoolTime = -1.0f;
-	CBullet						*m_pBullets[MAXBULLETNUM];
 
 	void SetPosition(float x, float y, float z);
 	void Move(DWORD dwDirection, float fDistance);
@@ -36,8 +35,6 @@ public:
 	void SetCameraOffset(XMFLOAT3& xmf3CameraOffset);
 	
 	void Update(float fTimeElapsed=0.016f);
-
-	void ShotBullet(float fTimeElapsed);
 
 	virtual void Animate(float fElapsedTime);
 	virtual void Render(HDC hDCFrameBuffer, CCamera *pCamera);

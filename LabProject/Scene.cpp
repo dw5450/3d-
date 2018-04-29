@@ -51,6 +51,45 @@ void CScene::Render(HDC hDCFrameBuffer, CCamera * pCamera)
 		object->Render(hDCFrameBuffer, pCamera);
 }
 
+
+
+void CScene::ShotBullet(XMFLOAT3 xmf3_Position, XMFLOAT3 xmf3_Diretxion, float fElapseTime, float & fBulletCoolTime, float fBulletMaxCoolTime)
+{
+	CBullet * Bullet = new CBullet;
+	fBulletCoolTime -= fElapseTime;
+	if (fBulletCoolTime < 0) {
+	
+		CCubeMesh * cube = new CCubeMesh(1.0f, 1.0f, 1.0f);
+		Bullet->SetMesh(cube);
+		Bullet->m_bActive = true;
+		Bullet->SetPosition(xmf3_Position);
+		Bullet->SetMovingDirection(xmf3_Diretxion);
+		Bullet->SetMovingSpeed(BULLETSPEED);
+		Bullet->SetRotationAxis(xmf3_Diretxion);
+		Bullet->SetRotationSpeed(360.0f);
+
+		fBulletCoolTime = fBulletMaxCoolTime;
+
+		m_pGameObjectManager->newBullet(Bullet);
+	}
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 CNomalStage::CNomalStage()
 {
 }
@@ -92,7 +131,7 @@ void CNomalStage::ReleaseObjects()
 
 void CNomalStage::Animate(float fElapsedTime)
 {
-	ResponEnermy(fElapsedTime);
+	ResponObject(fElapsedTime);
 
 	for (std::shared_ptr<CEnermy> & pEnermy : m_pGameObjectManager->GetplEnermys())
 		pEnermy->TraceObject(m_pPlayer);
@@ -208,7 +247,7 @@ void CNomalStage::CheckPlayerByWallCollision(float fElapsedTime)
 
 }
 
-void CNomalStage::ResponEnermy(float fElapsedTime)
+void CNomalStage::ResponObject(float fElapsedTime)
 {
 	CExplosiveObject::PrepareExplosion();
 	CCubeMesh *pObjectCubeMesh = new CCubeMesh(2.0f, 2.0f, 2.0f);
@@ -257,5 +296,4 @@ void CNomalStage::ResponEnermy(float fElapsedTime)
 	}
 
 }
-
 

@@ -11,7 +11,7 @@ public:
 	virtual ~CScene();
 
 	CPlayer						*m_pPlayer = NULL;
-	CGameObjectManager			*m_pGameObjectManager;
+	CGameObjectManager			*m_pGameObjectManager = NULL;
 
 
 	virtual void BuildObjects();
@@ -22,6 +22,8 @@ public:
 
 	virtual void OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
 	virtual void OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
+
+	void ShotBullet(XMFLOAT3 xmf3_Position, XMFLOAT3 xmf3_Diretxion, float fElapseTime, float & fBulletCoolTime, float fBulletMaxCoolTime);
 
 
 };
@@ -51,5 +53,6 @@ public:
 	void CheckPlayerByWallCollision(float fElapsedTime);
 	void CheckObjectByBulletCollisions();
 
-	void ResponEnermy(float fElapsedTime);
+	void ResponObject(float fElapsedTime);
+	void ShotBullet(CGameObject * pObject, float & fBulletCoolTime,const float fBulletMaxCoolTime);
 };

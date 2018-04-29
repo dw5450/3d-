@@ -17,18 +17,6 @@ CPlayer::CPlayer()
 	m_xmf3CameraOffset = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	m_xmf3Velocity = XMFLOAT3(0.0f, 0.0f, 0.0f);
 
-	CCubeMesh *pObjectCubeMesh = new CCubeMesh(1.0f, 1.0f, 1.0f);
-	for (int i = 0; i < MAXBULLETNUM; i++) {
-		m_pBullets[i] = new CBullet();
-		m_pBullets[i]->m_bActive = false;
-		m_pBullets[i]->SetPosition(-1000.0f, -1000.0f, -1000.0f);
-		m_pBullets[i]->SetMesh(pObjectCubeMesh);
-		m_pBullets[i]->SetColor(RGB(255, 0, 0));
-		m_pBullets[i]->SetMovingSpeed(BULLETSPEED);
-		m_pBullets[i]->SetRotationSpeed(600.0f);
-	}
-
-
 
 }
 
@@ -133,49 +121,9 @@ void CPlayer::Update(float fTimeElapsed)
 	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, xmf3Deceleration, fDeceleration);
 
 }
-
-void CPlayer::ShotBullet(float fTimeElapsed)
-{
-	//총알을 발사할 경우
-	if (m_bShotedBullet) {
-		m_bShotedBullet = false;
-		for (int i = 0; i < MAXBULLETNUM; i++) {
-			if (m_pBullets[i]->m_bActive == false && m_fBulletCoolTime < 0) {
-				m_pBullets[i]->m_bActive = true;
-				m_pBullets[i]->SetPosition(m_xmf3Position);
-				m_pBullets[i]->SetMovingDirection(m_xmf3Look);
-				m_pBullets[i]->SetRotationAxis(m_xmf3Look);
-				m_fBulletCoolTime = BULLETCOOLTIME;
-				break;
-			}
-		}
-	}
-	for (int i = 0; i < MAXBULLETNUM; i++)
-	{
-		if (m_pBullets[i]->m_bActive) {
-			if (m_pBullets[i]->fElapseTime > BULLETLIMITTIME) {
-				m_pBullets[i]->m_bActive = false;
-				m_pBullets[i]->fElapseTime = 0;
-			}
-			else {
-				m_pBullets[i]->fElapseTime += fTimeElapsed;
-			}
-		}
-	}
-	m_fBulletCoolTime -= fTimeElapsed;
-}
-
-
 void CPlayer::Animate(float fElapsedTime)
 {
 	CGameObject::Animate(fElapsedTime);
-	ShotBullet(fElapsedTime);
-
-	for (int i = 0; i < MAXBULLETNUM; i++) {
-		m_pBullets[i]->Animate(fElapsedTime);
-	}
-
-
 }
 
 void CPlayer::Render(HDC hDCFrameBuffer, CCamera *pCamera)
@@ -188,9 +136,6 @@ void CPlayer::Render(HDC hDCFrameBuffer, CCamera *pCamera)
 	m_xmf4x4World = Matrix4x4::Multiply(XMMatrixRotationRollPitchYaw(XMConvertToRadians(90.0f), 0.0f, 0.0f), m_xmf4x4World);
 	
 	CGameObject::Render(hDCFrameBuffer, pCamera);
-	for (int i = 0; i < MAXBULLETNUM; i++) {
-		m_pBullets[i]->Render(hDCFrameBuffer, pCamera);
-	}
 }
 
 
