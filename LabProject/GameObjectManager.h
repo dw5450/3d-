@@ -32,7 +32,5 @@ public:
 	std::list<std::shared_ptr<CBullet>> & GetplBullets();
 	std::list<std::shared_ptr<CEnermy>> & GetplEnermys();
 	std::list<std::shared_ptr<CBonusObject>> & GetplBonusObjects();
-
-
 };
 

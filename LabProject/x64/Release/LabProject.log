@@ -1,4 +1,12 @@
-﻿  GameFramework.cpp
+﻿  stdafx.cpp
+  Camera.cpp
+  GameFramework.cpp
+  GameObject.cpp
+  GameObjectManager.cpp
+  LabProject.cpp
+  Mesh.cpp
+  Player.cpp
   Scene.cpp
+  Timer.cpp
 GameFramework.obj : error LNK2001: __imp_timeGetTime 외부 기호를 확인할 수 없습니다.
-C:\Users\wdw\Desktop\3rd_grade_study\3d 게임 프로그래밍\과제용\x64\Release\LabProject.exe : fatal error LNK1120: 1개의 확인할 수 없는 외부 참조입니다.
+C:\Users\원동욱\Desktop\3d 과제\x64\Release\LabProject.exe : fatal error LNK1120: 1개의 확인할 수 없는 외부 참조입니다.

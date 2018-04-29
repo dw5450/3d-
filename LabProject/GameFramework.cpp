@@ -12,6 +12,8 @@ CGameFramework::CGameFramework()
 
 CGameFramework::~CGameFramework()
 {
+	if (m_pPlayer) delete m_pPlayer;
+	if (m_pScene) delete m_pScene;
 }
 
 bool CGameFramework::OnCreate(HINSTANCE hInstance, HWND hMainWnd)
