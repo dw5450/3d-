@@ -48,7 +48,7 @@ public:
 	float				m_fBonusObjectResponTime = BONOUSOBJECTRESPONTIME;
 
 public:
-	void CheckObjectByWallCollisions();
+	void CheckPlayerByWallCollision(float fElapsedTime);
 	void CheckObjectByBulletCollisions();
 
 	void ResponEnermy(float fElapsedTime);

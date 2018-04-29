@@ -101,7 +101,7 @@ void CNomalStage::Animate(float fElapsedTime)
 	m_pWallsObject->Animate(fElapsedTime);
 	m_pPlayer->Animate(fElapsedTime);
 
-	CheckObjectByWallCollisions();
+	CheckPlayerByWallCollision(fElapsedTime);
 
 	auto ObejctpList = m_pGameObjectManager->GetplGameObjects();
 	for (std::shared_ptr<CGameObject> & pObject : ObejctpList)
@@ -116,15 +116,12 @@ void CNomalStage::Render(HDC hDCFrameBuffer, CCamera * pCamera)
 	m_pWallsObject->Render(hDCFrameBuffer, pCamera);
 }
 
-void CNomalStage::CheckObjectByWallCollisions()
+void CNomalStage::CheckPlayerByWallCollision(float fElapsedTime)
 {
 	ContainmentType containType = m_pWallsObject->m_xmOOBB.Contains(m_pPlayer->m_xmOOBB);					//벽으로 충돌을 체크
 	switch (containType)
 	{
 	case CONTAINS:					//포함될 경우
-		m_pPlayer->SetMovingSpeed(PLAYER_SPEED);
-		m_pPlayer->SetColor(RGB(0, 0, 255));
-
 		break;
 
 	case DISJOINT:			//만나지 않을 경우
@@ -151,11 +148,13 @@ void CNomalStage::CheckObjectByWallCollisions()
 				break;
 
 			if (nPlaneIndex < 4) {
-				m_pPlayer->SetMovingSpeed(1.0f);
-				m_pPlayer->SetColor(RGB(235, 35, 35));
+				XMVECTOR moveDirection = -XMLoadFloat3(&m_pPlayer->m_xmf3MovingDirection);
+				XMStoreFloat3(&m_pPlayer->m_xmf3MovingDirection, moveDirection);
+
+				m_pPlayer->Move(m_pPlayer->m_xmf3MovingDirection, false);
 			}
 
-			if (nPlaneIndex == 4 || nPlaneIndex == 5)					//충돌할시
+			if (nPlaneIndex < 6)					//충돌할시
 			{
 				m_pWallsObject->SetPosition(0.0f, 0.0f, m_pPlayer->GetPosition().z);
 				break;
@@ -187,11 +186,13 @@ void CNomalStage::CheckObjectByWallCollisions()
 				break;
 
 			if (nPlaneIndex < 4) {
-				m_pPlayer->SetMovingSpeed(1.0f);
-				m_pPlayer->SetColor(RGB(235, 35, 35));
+				XMVECTOR moveDirection = -XMLoadFloat3(&m_pPlayer->m_xmf3MovingDirection);
+				XMStoreFloat3(&m_pPlayer->m_xmf3MovingDirection, moveDirection);
+
+				m_pPlayer->Move(m_pPlayer->m_xmf3MovingDirection, true);
 			}
 
-			if (nPlaneIndex == 4 || nPlaneIndex == 5)					//충돌할시
+			if (nPlaneIndex < 6)					//충돌할시
 			{
 				m_pWallsObject->SetPosition(0.0f, 0.0f, m_pPlayer->GetPosition().z);
 				break;
