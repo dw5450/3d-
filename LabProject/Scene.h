@@ -37,21 +37,7 @@ public:
 	virtual void BuildObjects();
 	virtual void ReleaseObjects();
 
-	virtual void Animate(float fElapsedTime)
-	{
-		ResponEnermy(fElapsedTime);
-
-		for (std::shared_ptr<CEnermy> & pEnermy : m_pGameObjectManager->GetplEnermys())
-			pEnermy->TraceObject(m_pPlayer);
-
-
-		m_pWallsObject->Animate(fElapsedTime);
-		m_pPlayer->Animate(fElapsedTime);
-		auto ObejctpList = m_pGameObjectManager->GetplGameObjects();
-		for (std::shared_ptr<CGameObject> & pObject : ObejctpList)
-			pObject->Animate(fElapsedTime);
-
-	}
+	virtual void Animate(float fElapsedTime);
 	virtual void Render(HDC hDCFrameBuffer, CCamera *pCamera);
 
 public:

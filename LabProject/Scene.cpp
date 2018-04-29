@@ -90,6 +90,22 @@ void CNomalStage::ReleaseObjects()
 	if(m_pGameObjectManager) delete m_pGameObjectManager;
 }
 
+void CNomalStage::Animate(float fElapsedTime)
+{
+	ResponEnermy(fElapsedTime);
+
+	for (std::shared_ptr<CEnermy> & pEnermy : m_pGameObjectManager->GetplEnermys())
+		pEnermy->TraceObject(m_pPlayer);
+
+
+	m_pWallsObject->Animate(fElapsedTime);
+	m_pPlayer->Animate(fElapsedTime);
+	auto ObejctpList = m_pGameObjectManager->GetplGameObjects();
+	for (std::shared_ptr<CGameObject> & pObject : ObejctpList)
+		pObject->Animate(fElapsedTime);
+
+}
+
 void CNomalStage::Render(HDC hDCFrameBuffer, CCamera * pCamera)
 {
 	CScene::Render(hDCFrameBuffer, pCamera);
@@ -103,17 +119,51 @@ void CNomalStage::CheckObjectByWallCollisions()
 
 void CNomalStage::ResponEnermy(float fElapsedTime)
 {
+	CExplosiveObject::PrepareExplosion();
+	CCubeMesh *pObjectCubeMesh = new CCubeMesh(2.0f, 2.0f, 2.0f);
+	pObjectCubeMesh->SetOOBB(XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(2.0f, 2.0f, 2.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
+
+	std::random_device rd;
+	std::default_random_engine dre(rd());
+	std::uniform_real_distribution<float> ufr(-WALL_HALF_SIZE, WALL_HALF_SIZE);
+	std::uniform_real_distribution<float> ufrRotaionAngle(0.0f, 360.0f);
+
 	m_fBonusObjectResponTime -= fElapsedTime;
+
 	if (m_fBonusObjectResponTime < 0) {
-		m_fBonusObjectResponTime = m_fEnermyResponInitTime;
+		m_fBonusObjectResponTime = m_fBonusObjectInitResponTime;
 		CBonusObject * BonusObject = new CBonusObject;
+		BonusObject->m_bActive = true;
+		BonusObject->SetMesh(pObjectCubeMesh);
+		BonusObject->SetColor(RGB(225, 35, 35));
+		BonusObject->SetPosition(XMFLOAT3(ufr(dre), ufr(dre), m_pPlayer->GetPosition().z + 145 + ufr(dre)));
+		BonusObject->SetMovingSpeed(BONUSOBJECTSPEED);
+		BonusObject->SetRotationAxis(XMFLOAT3(ufrRotaionAngle(dre), ufrRotaionAngle(dre), ufrRotaionAngle(dre)));
+		BonusObject->SetRotationSpeed(120);
 
-
-		delete BonusObject;
+		m_pGameObjectManager->newBounusObject(BonusObject);
+		
+		//delete BonusObject;
 	}
 
 
 	m_fEnermyResponTime -= fElapsedTime;
+
+	if (m_fEnermyResponTime  < 0) {
+		m_fEnermyResponTime = m_fEnermyResponInitTime;
+		CEnermy * Enermy = new CEnermy;
+		Enermy->m_bActive = true;
+		Enermy->SetMesh(pObjectCubeMesh);
+		Enermy->SetColor(RGB(35, 120, 35));
+		Enermy->SetPosition(XMFLOAT3(ufr(dre), ufr(dre), m_pPlayer->GetPosition().z + 145 + ufr(dre)));
+		Enermy->SetMovingSpeed(ENERMYSPEED);
+		Enermy->SetRotationAxis(XMFLOAT3(ufrRotaionAngle(dre), ufrRotaionAngle(dre), ufrRotaionAngle(dre)));
+		Enermy->SetRotationSpeed(120);
+
+		m_pGameObjectManager->newEnermy(Enermy);
+
+		//delete Enermy;
+	}
 
 }
 

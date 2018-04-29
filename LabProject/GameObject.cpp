@@ -260,4 +260,5 @@ void CEnermy::TraceObject(CGameObject * pObejct)
 {
 	XMVECTOR movingDirection = XMVector3Normalize( XMVectorSubtract(XMLoadFloat3(&pObejct->GetPosition()), XMLoadFloat3(&GetPosition())));
 	XMStoreFloat3(&m_xmf3MovingDirection, movingDirection);
+
 }

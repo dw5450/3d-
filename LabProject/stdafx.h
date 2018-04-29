@@ -72,7 +72,10 @@ using namespace DirectX::PackedVector;
 #define BULLETLIMITTIME				1.0f
 
 #define ENERMYRESPONTIME			1.0f
-#define BONOUSOBJECTRESPONTIME			1.0f
+#define BONOUSOBJECTRESPONTIME		10.0f
+
+#define ENERMYSPEED					30.0f
+#define BONUSOBJECTSPEED			60.0f
 
 
 #define WALL_HALF_SIZE				45.0f
