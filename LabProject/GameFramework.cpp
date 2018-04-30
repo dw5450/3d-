@@ -186,7 +186,8 @@ void CGameFramework::ProcessInput()
 		if (pKeyBuffer['S'] & 0xF0) dwDirection |= DIR_BACKWARD;
 		if (pKeyBuffer['A'] & 0xF0) dwDirection |= DIR_LEFT;
 		if (pKeyBuffer['D'] & 0xF0) dwDirection |= DIR_RIGHT;
-		if (pKeyBuffer[VK_CONTROL] & 0xF0) bShotBullet = true;
+		if (pKeyBuffer[VK_CONTROL] & 0xF0) m_pPlayer->m_bShotBullet = true;
+		if (pKeyBuffer['R'] & 0xF0) m_pPlayer->m_bReload = true;
 	
 	}
 	float cxDelta = 0.0f, cyDelta = 0.0f;
@@ -226,11 +227,6 @@ void CGameFramework::FrameAdvance()
 	//오브젝트들의 좌표를 이동시킵니다.
 	m_pPlayer->Animate(m_GameTimer.GetTimeElapsed());
 	m_pScene->Animate(m_GameTimer.GetTimeElapsed());
-
-	if (bShotBullet) {
-		m_pScene->ShotBullet(m_pPlayer->GetPosition(), m_pPlayer->GetUp(), m_GameTimer.GetTimeElapsed(), m_pPlayer->m_fBulletCoolTime, BULLETCOOLTIME);
-		bShotBullet = false;
-	}
 
 
 	//화면을 초기화 시킵니다.

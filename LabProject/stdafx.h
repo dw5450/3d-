@@ -69,7 +69,9 @@ using namespace DirectX::PackedVector;
 #define MAXBULLETNUM				20
 #define BULLETCOOLTIME				0.3f
 #define BULLETSPEED					120.0f
-#define BULLETLIMITTIME				1.0f
+#define BULLETLIMITTIME				3.0f
+
+#define RELOADTIME					1.0f
 
 #define ENERMYRESPONTIME			1.0f
 #define BONOUSOBJECTRESPONTIME		10.0f

@@ -95,7 +95,9 @@ public:
 	virtual ~CEnermy() {};
 
 public:
+
 	void TraceObject(CGameObject * );
+
 
 };
 

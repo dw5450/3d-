@@ -256,6 +256,7 @@ CBullet::~CBullet()
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 
+
 void CEnermy::TraceObject(CGameObject * pObejct)
 {
 	XMVECTOR movingDirection = XMVector3Normalize( XMVectorSubtract(XMLoadFloat3(&pObejct->GetPosition()), XMLoadFloat3(&GetPosition())));

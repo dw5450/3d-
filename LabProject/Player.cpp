@@ -123,6 +123,8 @@ void CPlayer::Update(float fTimeElapsed)
 }
 void CPlayer::Animate(float fElapsedTime)
 {
+	ReloadBullet(fElapsedTime);
+	m_fBulletCooltime -= fElapsedTime;
 	CGameObject::Animate(fElapsedTime);
 }
 
@@ -138,6 +140,47 @@ void CPlayer::Render(HDC hDCFrameBuffer, CCamera *pCamera)
 	CGameObject::Render(hDCFrameBuffer, pCamera);
 }
 
+bool CPlayer::CanShot()
+{
+	if (m_bShotBullet && m_iBulletNum > 0 && m_fBulletCooltime < 0 && !m_bReload) {
+		m_bShotBullet = false;
+		return true;
+	}
+
+	return false;
+}
+
+CBullet * CPlayer::ShotBullet(float fElapseTime)
+{
+	m_bShotBullet = false;
+	--m_iBulletNum;
+	CCubeMesh *pObjectCubeMesh = new CCubeMesh(1.0f, 1.0f, 1.0f);
+	CBullet * pBullet = new CBullet;
+	pBullet->SetMesh(pObjectCubeMesh);
+	pBullet->SetColor(RGB(255, 0, 0));
+	pBullet->SetMovingSpeed(BULLETSPEED);
+	pBullet->SetRotationSpeed(600.0f);
+	pBullet->SetPosition(m_xmf3Position);
+	pBullet->SetMovingDirection(m_xmf3Look);
+	pBullet->SetRotationAxis(m_xmf3Look);
+	m_fBulletCooltime = m_fBulletInitCooltime;
+	return pBullet;
+}
+
+void CPlayer::ReloadBullet(float fElapseTime)
+{
+	if (m_bReload) {
+		m_bReloadTime -= fElapseTime;
+		if (m_bReloadTime < 0) {
+			m_bReload = false;
+			m_iBulletNum = m_iBulletMaxNum;
+			m_bReloadTime = m_bReloadInitTime;
+		}
+	}
+}
+
+
+
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////
-

@@ -23,9 +23,6 @@ public:
 	virtual void OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
 	virtual void OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
 
-	void ShotBullet(XMFLOAT3 xmf3_Position, XMFLOAT3 xmf3_Diretxion, float fElapseTime, float & fBulletCoolTime, float fBulletMaxCoolTime);
-
-
 };
 
 
@@ -50,8 +47,8 @@ public:
 	float				m_fBonusObjectResponTime = BONOUSOBJECTRESPONTIME;
 
 public:
-	void CheckPlayerByWallCollision(float fElapsedTime);
-	void CheckObjectByBulletCollisions();
+	void CheckPlayerByWallCollision();
+	void CheckEnermyByBulletCollisions();
 
 	void ResponObject(float fElapsedTime);
 	void ShotBullet(CGameObject * pObject, float & fBulletCoolTime,const float fBulletMaxCoolTime);

@@ -36,7 +36,6 @@ void CScene::ReleaseObjects()
 void CScene::Animate(float fElapsedTime)
 {
 	m_pPlayer->Animate(fElapsedTime);
-
 	auto Objectlist = m_pGameObjectManager->GetplGameObjects();
 	for (const std::shared_ptr<CGameObject> & object : Objectlist)
 		object->Animate(fElapsedTime);
@@ -50,44 +49,6 @@ void CScene::Render(HDC hDCFrameBuffer, CCamera * pCamera)
 	for (const std::shared_ptr<CGameObject> & object : Objectlist)
 		object->Render(hDCFrameBuffer, pCamera);
 }
-
-
-
-void CScene::ShotBullet(XMFLOAT3 xmf3_Position, XMFLOAT3 xmf3_Diretxion, float fElapseTime, float & fBulletCoolTime, float fBulletMaxCoolTime)
-{
-	CBullet * Bullet = new CBullet;
-	fBulletCoolTime -= fElapseTime;
-	if (fBulletCoolTime < 0) {
-	
-		CCubeMesh * cube = new CCubeMesh(1.0f, 1.0f, 1.0f);
-		Bullet->SetMesh(cube);
-		Bullet->m_bActive = true;
-		Bullet->SetPosition(xmf3_Position);
-		Bullet->SetMovingDirection(xmf3_Diretxion);
-		Bullet->SetMovingSpeed(BULLETSPEED);
-		Bullet->SetRotationAxis(xmf3_Diretxion);
-		Bullet->SetRotationSpeed(360.0f);
-
-		fBulletCoolTime = fBulletMaxCoolTime;
-
-		m_pGameObjectManager->newBullet(Bullet);
-	}
-
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 CNomalStage::CNomalStage()
@@ -117,8 +78,8 @@ void CNomalStage::BuildObjects()
 	m_pWallsObject->m_pxmf4WallPlanes[1] = XMFLOAT4(-1.0f, 0.0f, 0.0f, fHalfWidth);
 	m_pWallsObject->m_pxmf4WallPlanes[2] = XMFLOAT4(0.0f, +1.0f, 0.0f, fHalfHeight);
 	m_pWallsObject->m_pxmf4WallPlanes[3] = XMFLOAT4(0.0f, -1.0f, 0.0f, fHalfHeight);
-	m_pWallsObject->m_pxmf4WallPlanes[4] = XMFLOAT4(0.0f, 0.0f, +1.0f, 10);
-	m_pWallsObject->m_pxmf4WallPlanes[5] = XMFLOAT4(0.0f, 0.0f, -1.0f, 10);
+	m_pWallsObject->m_pxmf4WallPlanes[4] = XMFLOAT4(0.0f, 0.0f, +1.0f, fHalfDepth * 0.1f);
+	m_pWallsObject->m_pxmf4WallPlanes[5] = XMFLOAT4(0.0f, 0.0f, -1.0f, fHalfDepth * 0.1f);
 
 }
 
@@ -136,11 +97,15 @@ void CNomalStage::Animate(float fElapsedTime)
 	for (std::shared_ptr<CEnermy> & pEnermy : m_pGameObjectManager->GetplEnermys())
 		pEnermy->TraceObject(m_pPlayer);
 
+	CheckPlayerByWallCollision();
+	CheckEnermyByBulletCollisions();
+
+	if(m_pPlayer->CanShot())
+		m_pGameObjectManager->newBullet(m_pPlayer->ShotBullet(fElapsedTime));
 
 	m_pWallsObject->Animate(fElapsedTime);
 	m_pPlayer->Animate(fElapsedTime);
 
-	CheckPlayerByWallCollision(fElapsedTime);
 
 	auto ObejctpList = m_pGameObjectManager->GetplGameObjects();
 	for (std::shared_ptr<CGameObject> & pObject : ObejctpList)
@@ -155,7 +120,7 @@ void CNomalStage::Render(HDC hDCFrameBuffer, CCamera * pCamera)
 	m_pWallsObject->Render(hDCFrameBuffer, pCamera);
 }
 
-void CNomalStage::CheckPlayerByWallCollision(float fElapsedTime)
+void CNomalStage::CheckPlayerByWallCollision()
 {
 	ContainmentType containType = m_pWallsObject->m_xmOOBB.Contains(m_pPlayer->m_xmOOBB);					//벽으로 충돌을 체크
 	switch (containType)
@@ -193,7 +158,7 @@ void CNomalStage::CheckPlayerByWallCollision(float fElapsedTime)
 				m_pPlayer->Move(m_pPlayer->m_xmf3MovingDirection, false);
 			}
 
-			if (nPlaneIndex < 6)					//충돌할시
+			else if (nPlaneIndex < 6)					//충돌할시
 			{
 				m_pWallsObject->SetPosition(0.0f, 0.0f, m_pPlayer->GetPosition().z);
 				break;
@@ -231,20 +196,31 @@ void CNomalStage::CheckPlayerByWallCollision(float fElapsedTime)
 				m_pPlayer->Move(m_pPlayer->m_xmf3MovingDirection, true);
 			}
 
-			if (nPlaneIndex < 6)					//충돌할시
-			{
+			else if(nPlaneIndex < 6) {				//충돌할시
 				m_pWallsObject->SetPosition(0.0f, 0.0f, m_pPlayer->GetPosition().z);
-				break;
+
 			}
+	
 		}
 		break;
 	}
 
 	}
+}
 
-
-
-
+void CNomalStage::CheckEnermyByBulletCollisions()
+{
+	for (std::shared_ptr<CBullet> & pBullet : m_pGameObjectManager->GetplBullets()) {
+		for (std::shared_ptr<CEnermy> &  pEnermy : m_pGameObjectManager->GetplEnermys())
+		{
+			if (pBullet->m_xmOOBB.Intersects(pEnermy->m_xmOOBB))
+			{
+				//cllieded 어떻게?
+				pEnermy->m_bBlowingUp = true;
+			}
+		}
+	}
+	
 }
 
 void CNomalStage::ResponObject(float fElapsedTime)

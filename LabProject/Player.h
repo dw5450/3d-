@@ -24,9 +24,6 @@ public:
 
 	CCamera						*m_pCamera = NULL;
 
-	bool						m_bShotedBullet = false;
-	float						m_fBulletCoolTime = -1.0f;
-
 	void SetPosition(float x, float y, float z);
 	void Move(DWORD dwDirection, float fDistance);
 	void Move(XMFLOAT3& xmf3Shift, bool bUpdateVelocity);
@@ -38,5 +35,20 @@ public:
 
 	virtual void Animate(float fElapsedTime);
 	virtual void Render(HDC hDCFrameBuffer, CCamera *pCamera);
+
+
+public:		//skill
+	bool					m_bShotBullet = false;
+	float					m_fBulletCooltime = BULLETCOOLTIME;
+	float					m_fBulletInitCooltime = BULLETCOOLTIME;
+	unsigned int			m_iBulletMaxNum = MAXBULLETNUM;
+	unsigned int			m_iBulletNum = MAXBULLETNUM;
+	bool CanShot();
+	CBullet * ShotBullet(float fElapseTime);
+	
+	bool					m_bReload	= false;
+	float					m_bReloadTime = RELOADTIME;
+	float					m_bReloadInitTime = RELOADTIME;
+	void ReloadBullet(float fElapseTime);
 };
 
