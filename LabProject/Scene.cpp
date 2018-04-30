@@ -25,29 +25,23 @@ void CScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wPar
 
 void CScene::BuildObjects()
 {
-	m_pGameObjectManager = new CGameObjectManager;
+	
 }
 
 void CScene::ReleaseObjects()
 {
-	delete m_pGameObjectManager;
+
 }
 
 void CScene::Animate(float fElapsedTime)
 {
 	m_pPlayer->Animate(fElapsedTime);
-	auto Objectlist = m_pGameObjectManager->GetplGameObjects();
-	for (const std::shared_ptr<CGameObject> & object : Objectlist)
-		object->Animate(fElapsedTime);
 }
 
 void CScene::Render(HDC hDCFrameBuffer, CCamera * pCamera)
 {
 	m_pPlayer->Render(hDCFrameBuffer, pCamera);
 
-	auto Objectlist = m_pGameObjectManager->GetplGameObjects();
-	for (const std::shared_ptr<CGameObject> & object : Objectlist)
-		object->Render(hDCFrameBuffer, pCamera);
 }
 
 
@@ -68,7 +62,7 @@ void CNomalStage::BuildObjects()
 	//벽설정
 	float fHalfWidth = 45.0f, fHalfHeight = 45.0f, fHalfDepth = 500.0f;									//1.0f 당 1m
 	CWallMesh *pWallCubeMesh = new CWallMesh(fHalfWidth * 2.0f, fHalfHeight * 2.0f, fHalfDepth * 2.0f, 20);
-	pWallCubeMesh->SetOOBB(XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(fHalfWidth, fHalfHeight, fHalfDepth * 0.1f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
+	pWallCubeMesh->SetOOBB(XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(fHalfWidth, fHalfHeight, fHalfDepth), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
 
 	m_pWallsObject = new CWallsObject();
 	m_pWallsObject->SetPosition(0.0f, 0.0f, 0.0f);
@@ -78,8 +72,8 @@ void CNomalStage::BuildObjects()
 	m_pWallsObject->m_pxmf4WallPlanes[1] = XMFLOAT4(-1.0f, 0.0f, 0.0f, fHalfWidth);
 	m_pWallsObject->m_pxmf4WallPlanes[2] = XMFLOAT4(0.0f, +1.0f, 0.0f, fHalfHeight);
 	m_pWallsObject->m_pxmf4WallPlanes[3] = XMFLOAT4(0.0f, -1.0f, 0.0f, fHalfHeight);
-	m_pWallsObject->m_pxmf4WallPlanes[4] = XMFLOAT4(0.0f, 0.0f, +1.0f, fHalfDepth * 0.1f);
-	m_pWallsObject->m_pxmf4WallPlanes[5] = XMFLOAT4(0.0f, 0.0f, -1.0f, fHalfDepth * 0.1f);
+	m_pWallsObject->m_pxmf4WallPlanes[4] = XMFLOAT4(0.0f, 0.0f, +1.0f, fHalfDepth);
+	m_pWallsObject->m_pxmf4WallPlanes[5] = XMFLOAT4(0.0f, 0.0f, -1.0f, fHalfDepth);
 
 }
 
@@ -87,40 +81,63 @@ void CNomalStage::ReleaseObjects()
 {
 	if(m_pWallsObject) delete m_pWallsObject;
 	if (m_pPlayer) delete m_pPlayer;
-	if(m_pGameObjectManager) delete m_pGameObjectManager;
 }
 
 void CNomalStage::Animate(float fElapsedTime)
 {
 	ResponObject(fElapsedTime);
 
-	for (std::shared_ptr<CEnermy> & pEnermy : m_pGameObjectManager->GetplEnermys())
-		pEnermy->TraceObject(m_pPlayer);
+	if (m_pPlayer->CanShot())
+		m_plBullets.emplace_back(m_pPlayer->ShotBullet());
 
-	CheckPlayerByWallCollision();
+	m_pPlayer->Animate(fElapsedTime);
+	m_pWallsObject->Animate(fElapsedTime);
+	
+
+	for (std::shared_ptr<CBullet> & data : m_plBullets)
+		data->Animate(fElapsedTime);
+
+	for (std::shared_ptr<CEnermy> & data : m_plEnermys) {
+		data->TraceObject(m_pPlayer);
+		data->Animate(fElapsedTime);
+	}
+	for (std::shared_ptr<CBonusObject> & data : m_plBonusObjects)
+		data->Animate(fElapsedTime);
+
+	CheckPlayerByWallCollision(fElapsedTime);
+	CheckBulletByWallCollision();
 	CheckEnermyByBulletCollisions();
 
-	if(m_pPlayer->CanShot())
-		m_pGameObjectManager->newBullet(m_pPlayer->ShotBullet(fElapsedTime));
 
-	m_pWallsObject->Animate(fElapsedTime);
-	m_pPlayer->Animate(fElapsedTime);
+	auto EnermysItor = m_plEnermys.begin();
+	for (;EnermysItor != m_plEnermys.end();) {
+		std::shared_ptr<CEnermy> Enermy = *EnermysItor;
+		if (Enermy->m_bBlowingUp && Enermy->m_fElapsedTimes > Enermy->m_fDuration)
+			EnermysItor = m_plEnermys.erase(EnermysItor);
+		else ++EnermysItor;
 
+	}
 
-	auto ObejctpList = m_pGameObjectManager->GetplGameObjects();
-	for (std::shared_ptr<CGameObject> & pObject : ObejctpList)
-		pObject->Animate(fElapsedTime);
 
 }
 
 void CNomalStage::Render(HDC hDCFrameBuffer, CCamera * pCamera)
 {
-	CScene::Render(hDCFrameBuffer, pCamera);
+	m_pPlayer->Render(hDCFrameBuffer, pCamera);
 	
 	m_pWallsObject->Render(hDCFrameBuffer, pCamera);
+
+	for (std::shared_ptr<CBullet> & data : m_plBullets)
+		data->Render(hDCFrameBuffer, pCamera);
+
+	for (std::shared_ptr<CEnermy> & data : m_plEnermys)
+		data->Render(hDCFrameBuffer, pCamera);
+
+	for (std::shared_ptr<CBonusObject> & data : m_plBonusObjects)
+		data->Render(hDCFrameBuffer, pCamera);
 }
 
-void CNomalStage::CheckPlayerByWallCollision()
+void CNomalStage::CheckPlayerByWallCollision(float fElapseTime)
 {
 	ContainmentType containType = m_pWallsObject->m_xmOOBB.Contains(m_pPlayer->m_xmOOBB);					//벽으로 충돌을 체크
 	switch (containType)
@@ -128,7 +145,7 @@ void CNomalStage::CheckPlayerByWallCollision()
 	case CONTAINS:					//포함될 경우
 		break;
 
-	case DISJOINT:			//만나지 않을 경우
+	case INTERSECTS:						//겹칠경우
 	{
 		int nPlaneIndex = -1;
 		for (int j = 0; j < 6; j++)
@@ -136,71 +153,15 @@ void CNomalStage::CheckPlayerByWallCollision()
 			PlaneIntersectionType intersectType = m_pPlayer->m_xmOOBB.Intersects(XMLoadFloat4(&m_pWallsObject->m_pxmf4WallPlanes[j]));
 			if (intersectType == INTERSECTING)
 			{
-				nPlaneIndex = j;
+				if (j < 4) {
+					
+					XMVECTOR moveDirection = -XMLoadFloat3(&m_pPlayer->m_xmf3MovingDirection);
+					XMStoreFloat3(&m_pPlayer->m_xmf3MovingDirection, moveDirection);
+
+					m_pPlayer->Move(m_pPlayer->m_xmf3MovingDirection, false);
+				}
 				break;
 			}
-		}
-		for (int j = 0; j < 6; j++)
-		{
-			PlaneIntersectionType intersectType = m_pPlayer->m_xmOOBB.Intersects(XMLoadFloat4(&m_pWallsObject->m_pxmf4WallPlanes[j]));
-			if (intersectType == BACK)
-			{
-				nPlaneIndex = j;
-				break;
-			}
-			if (nPlaneIndex < 0)
-				break;
-
-			if (nPlaneIndex < 4) {
-				XMVECTOR moveDirection = -XMLoadFloat3(&m_pPlayer->m_xmf3MovingDirection);
-				XMStoreFloat3(&m_pPlayer->m_xmf3MovingDirection, moveDirection);
-
-				m_pPlayer->Move(m_pPlayer->m_xmf3MovingDirection, false);
-			}
-
-			else if (nPlaneIndex < 6)					//충돌할시
-			{
-				m_pWallsObject->SetPosition(0.0f, 0.0f, m_pPlayer->GetPosition().z);
-				break;
-			}
-		}
-		break;
-	}
-	case INTERSECTS:						//만날경우?
-	{
-		int nPlaneIndex = -1;
-		for (int j = 0; j < 6; j++)
-		{
-			PlaneIntersectionType intersectType = m_pPlayer->m_xmOOBB.Intersects(XMLoadFloat4(&m_pWallsObject->m_pxmf4WallPlanes[j]));
-			if (intersectType == INTERSECTING)
-			{
-				nPlaneIndex = j;
-				break;
-			}
-		}
-		for (int j = 0; j < 6; j++)
-		{
-			PlaneIntersectionType intersectType = m_pPlayer->m_xmOOBB.Intersects(XMLoadFloat4(&m_pWallsObject->m_pxmf4WallPlanes[j]));
-			if (intersectType == BACK)
-			{
-				nPlaneIndex = j;
-				break;
-			}
-			if (nPlaneIndex < 0)
-				break;
-
-			if (nPlaneIndex < 4) {
-				XMVECTOR moveDirection = -XMLoadFloat3(&m_pPlayer->m_xmf3MovingDirection);
-				XMStoreFloat3(&m_pPlayer->m_xmf3MovingDirection, moveDirection);
-
-				m_pPlayer->Move(m_pPlayer->m_xmf3MovingDirection, true);
-			}
-
-			else if(nPlaneIndex < 6) {				//충돌할시
-				m_pWallsObject->SetPosition(0.0f, 0.0f, m_pPlayer->GetPosition().z);
-
-			}
-	
 		}
 		break;
 	}
@@ -208,19 +169,31 @@ void CNomalStage::CheckPlayerByWallCollision()
 	}
 }
 
+void CNomalStage::CheckBulletByWallCollision()
+{
+	auto m_plBullets_itor = m_plBullets.begin();
+	for (;m_plBullets_itor != m_plBullets.end();) {
+		std::shared_ptr<CGameObject> bullet = *m_plBullets_itor;
+		if (!bullet->m_xmOOBB.Intersects(m_pWallsObject->m_xmOOBB)) {
+			m_plBullets_itor = m_plBullets.erase(m_plBullets_itor);
+		}
+		else ++m_plBullets_itor;
+	}
+}
+
 void CNomalStage::CheckEnermyByBulletCollisions()
 {
-	for (std::shared_ptr<CBullet> & pBullet : m_pGameObjectManager->GetplBullets()) {
-		for (std::shared_ptr<CEnermy> &  pEnermy : m_pGameObjectManager->GetplEnermys())
-		{
-			if (pBullet->m_xmOOBB.Intersects(pEnermy->m_xmOOBB))
-			{
-				//cllieded 어떻게?
-				pEnermy->m_bBlowingUp = true;
+	for (std::shared_ptr<CEnermy> & Enermy : m_plEnermys) {
+		auto m_plBullets_itor = m_plBullets.begin();
+		for (;m_plBullets_itor != m_plBullets.end();) {
+			std::shared_ptr<CGameObject> bullet = *m_plBullets_itor;
+			if (bullet->m_xmOOBB.Intersects(Enermy->m_xmOOBB) && !Enermy->m_bBlowingUp){
+				Enermy->m_bBlowingUp = true;
+				m_plBullets_itor = m_plBullets.erase(m_plBullets_itor);
 			}
+			else ++m_plBullets_itor;
 		}
 	}
-	
 }
 
 void CNomalStage::ResponObject(float fElapsedTime)
@@ -246,10 +219,8 @@ void CNomalStage::ResponObject(float fElapsedTime)
 		BonusObject->SetMovingSpeed(BONUSOBJECTSPEED);
 		BonusObject->SetRotationAxis(XMFLOAT3(ufrRotaionAngle(dre), ufrRotaionAngle(dre), ufrRotaionAngle(dre)));
 		BonusObject->SetRotationSpeed(120);
-
-		m_pGameObjectManager->newBounusObject(BonusObject);
 		
-		//delete BonusObject;
+		m_plBonusObjects.emplace_back(BonusObject);
 	}
 
 
@@ -266,8 +237,8 @@ void CNomalStage::ResponObject(float fElapsedTime)
 		Enermy->SetRotationAxis(XMFLOAT3(ufrRotaionAngle(dre), ufrRotaionAngle(dre), ufrRotaionAngle(dre)));
 		Enermy->SetRotationSpeed(120);
 
-		m_pGameObjectManager->newEnermy(Enermy);
 
+		m_plEnermys.emplace_back(Enermy);
 		//delete Enermy;
 	}
 

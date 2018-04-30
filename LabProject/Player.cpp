@@ -150,7 +150,7 @@ bool CPlayer::CanShot()
 	return false;
 }
 
-CBullet * CPlayer::ShotBullet(float fElapseTime)
+CBullet * CPlayer::ShotBullet()
 {
 	m_bShotBullet = false;
 	--m_iBulletNum;

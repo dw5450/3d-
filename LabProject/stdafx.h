@@ -34,6 +34,8 @@
 #include <tchar.h>
 #include <math.h>
 #include <random>
+#include <list>
+#include <memory>
 
 #include <d3d12.h>
 #include <DirectXMath.h>

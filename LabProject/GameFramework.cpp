@@ -225,7 +225,6 @@ void CGameFramework::FrameAdvance()
 	ProcessInput();							//키보드나 마우스의 입력을 받습니다.
 
 	//오브젝트들의 좌표를 이동시킵니다.
-	m_pPlayer->Animate(m_GameTimer.GetTimeElapsed());
 	m_pScene->Animate(m_GameTimer.GetTimeElapsed());
 
 
@@ -234,7 +233,6 @@ void CGameFramework::FrameAdvance()
 
 	//화면에 오브젝트들을 그립니다.
 	m_pScene->Render(m_hDCFrameBuffer, m_pPlayer->m_pCamera);
-	m_pPlayer->Render(m_hDCFrameBuffer, m_pPlayer->m_pCamera);
 
 	PresentFrameBuffer();				//버퍼링을 적용 시킵니다.
 

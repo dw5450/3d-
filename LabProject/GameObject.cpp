@@ -206,12 +206,6 @@ void CExplosiveObject::Animate(float fElapsedTime)
 				m_pxmf4x4Transforms[i] = Matrix4x4::Multiply(Matrix4x4::RotationAxis(m_pxmf3SphereVectors[i], m_fExplosionRotation * m_fElapsedTimes), m_pxmf4x4Transforms[i]);
 			}
 		}
-		else
-		{
-			SetPosition(XMFLOAT3(-1000, -1000, -1000));
-			m_bBlowingUp = false;
-			m_fElapsedTimes = 0.0f;
-		}
 	}
 	else
 	{

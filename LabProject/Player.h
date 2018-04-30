@@ -44,7 +44,7 @@ public:		//skill
 	unsigned int			m_iBulletMaxNum = MAXBULLETNUM;
 	unsigned int			m_iBulletNum = MAXBULLETNUM;
 	bool CanShot();
-	CBullet * ShotBullet(float fElapseTime);
+	CBullet * ShotBullet();
 	
 	bool					m_bReload	= false;
 	float					m_bReloadTime = RELOADTIME;

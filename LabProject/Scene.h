@@ -2,7 +2,6 @@
 
 #include "GameObject.h"
 #include "Player.h"
-#include "GameObjectManager.h"
 
 class CScene
 {
@@ -11,7 +10,6 @@ public:
 	virtual ~CScene();
 
 	CPlayer						*m_pPlayer = NULL;
-	CGameObjectManager			*m_pGameObjectManager = NULL;
 
 
 	virtual void BuildObjects();
@@ -40,14 +38,20 @@ public:
 	virtual void Render(HDC hDCFrameBuffer, CCamera *pCamera);
 
 public:
-	CWallsObject		*m_pWallsObject = NULL;		
+	CWallsObject		*m_pWallsObject = NULL;
+	std::list<std::shared_ptr<CBullet>>				m_plBullets;
+	std::list<std::shared_ptr<CEnermy>>				m_plEnermys;
+	std::list<std::shared_ptr<CBonusObject>>		m_plBonusObjects;
+
+
 	float				m_fEnermyResponInitTime = ENERMYRESPONTIME;
 	float				m_fEnermyResponTime = ENERMYRESPONTIME;
 	float				m_fBonusObjectInitResponTime = BONOUSOBJECTRESPONTIME;
 	float				m_fBonusObjectResponTime = BONOUSOBJECTRESPONTIME;
 
 public:
-	void CheckPlayerByWallCollision();
+	void  CheckPlayerByWallCollision(float fElapseTime);
+	void CheckBulletByWallCollision();
 	void CheckEnermyByBulletCollisions();
 
 	void ResponObject(float fElapsedTime);
