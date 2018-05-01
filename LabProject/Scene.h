@@ -3,6 +3,18 @@
 #include "GameObject.h"
 #include "Player.h"
 
+
+#define RemoveExplosionObject(pObjectList) \
+	auto  Itor = pObjectList.begin(); \
+	for (;Itor != pObjectList.end();) {\
+	std::shared_ptr<CExplosiveObject> pExplosionObject = *Itor;\
+	if (pExplosionObject->m_bBlowingUp && pExplosionObject->m_fElapsedTimes > pExplosionObject->m_fDuration)\
+		Itor = pObjectList.erase(Itor);\
+	else ++Itor;\
+	}
+
+
+
 class CScene
 {
 public:
@@ -50,10 +62,17 @@ public:
 	float				m_fBonusObjectResponTime = BONOUSOBJECTRESPONTIME;
 
 public:
-	void  CheckPlayerByWallCollision(float fElapseTime);
+	void CheckPlayerByWallCollision(float fElapseTime);
 	void CheckBulletByWallCollision();
+	void CheckBnousObjectByWallCollision();
 	void CheckEnermyByBulletCollisions();
+	void CheckBonusObjectBulletCollisions();
+	void CheckPlayerByEnermyCollisions();
+
 
 	void ResponObject(float fElapsedTime);
 	void ShotBullet(CGameObject * pObject, float & fBulletCoolTime,const float fBulletMaxCoolTime);
+
+	void RemoveEnermy();
+	void RemoveBonusObject();
 };

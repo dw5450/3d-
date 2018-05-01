@@ -78,8 +78,8 @@ using namespace DirectX::PackedVector;
 #define ENERMYRESPONTIME			1.0f
 #define BONOUSOBJECTRESPONTIME		10.0f
 
-#define ENERMYSPEED					30.0f
-#define BONUSOBJECTSPEED			60.0f
+#define ENERMYSPEED					10.0f
+#define BONUSOBJECTSPEED			30.0f
 
 
 #define WALL_HALF_SIZE				45.0f

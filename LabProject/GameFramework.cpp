@@ -237,7 +237,12 @@ void CGameFramework::FrameAdvance()
 	PresentFrameBuffer();				//버퍼링을 적용 시킵니다.
 
 	m_GameTimer.GetFrameRate(m_pszFrameRate + 12, 37);				//프레임 레이트를 설정합니다.
-	::SetWindowText(m_hWnd, m_pszFrameRate);						//프레임 레이트를 보여줍니다.
+	::SetWindowText(m_hWnd, m_pszFrameRate);		//프레임 레이트를 보여줍니다.
+
+	if(m_pPlayer->m_iLife <=0){
+		DestroyWindow(m_hWnd);
+		::PostQuitMessage(0);
+	}
 }
 
 

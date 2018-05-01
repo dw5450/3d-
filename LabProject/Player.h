@@ -50,5 +50,10 @@ public:		//skill
 	float					m_bReloadTime = RELOADTIME;
 	float					m_bReloadInitTime = RELOADTIME;
 	void ReloadBullet(float fElapseTime);
+
+	unsigned int m_iBombNum = 0;
+	bool ShotBomb();
+
+	unsigned int m_iLife = 5;
 };
 

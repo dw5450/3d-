@@ -179,6 +179,15 @@ void CPlayer::ReloadBullet(float fElapseTime)
 	}
 }
 
+bool CPlayer::ShotBomb()
+{
+	if (m_iBombNum > 0) {
+		--m_iBombNum;
+		return true;
+	}
+	return false;
+}
+
 
 
 

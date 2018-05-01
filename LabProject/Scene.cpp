@@ -101,23 +101,19 @@ void CNomalStage::Animate(float fElapsedTime)
 		data->TraceObject(m_pPlayer);
 		data->Animate(fElapsedTime);
 	}
+
 	for (std::shared_ptr<CBonusObject> & data : m_plBonusObjects)
 		data->Animate(fElapsedTime);
 
 	CheckPlayerByWallCollision(fElapsedTime);
 	CheckBulletByWallCollision();
+	CheckBnousObjectByWallCollision();
 	CheckEnermyByBulletCollisions();
+	CheckBonusObjectBulletCollisions();
+	CheckPlayerByEnermyCollisions();
 
-
-	auto EnermysItor = m_plEnermys.begin();
-	for (;EnermysItor != m_plEnermys.end();) {
-		std::shared_ptr<CEnermy> Enermy = *EnermysItor;
-		if (Enermy->m_bBlowingUp && Enermy->m_fElapsedTimes > Enermy->m_fDuration)
-			EnermysItor = m_plEnermys.erase(EnermysItor);
-		else ++EnermysItor;
-
-	}
-
+	RemoveEnermy();
+	RemoveBonusObject();
 
 }
 
@@ -196,6 +192,44 @@ void CNomalStage::CheckEnermyByBulletCollisions()
 	}
 }
 
+void CNomalStage::CheckBonusObjectBulletCollisions()
+{
+	for (std::shared_ptr<CBonusObject> & pBonusObject : m_plBonusObjects) {
+		auto m_plBullets_itor = m_plBullets.begin();
+		for (;m_plBullets_itor != m_plBullets.end();) {
+			std::shared_ptr<CGameObject> bullet = *m_plBullets_itor;
+			if (bullet->m_xmOOBB.Intersects(pBonusObject->m_xmOOBB) && !pBonusObject->m_bBlowingUp) {
+				if(!pBonusObject->m_bBlowingUp)
+					++m_pPlayer->m_iBombNum;
+				pBonusObject->m_bBlowingUp = true;
+				m_plBullets_itor = m_plBullets.erase(m_plBullets_itor);
+			}
+			else ++m_plBullets_itor;
+		}
+	}
+}
+
+void CNomalStage::CheckPlayerByEnermyCollisions()
+{
+	for (std::shared_ptr<CEnermy> & pEnermy : m_plEnermys) {
+		if(m_pPlayer->m_xmOOBB.Intersects(pEnermy->m_xmOOBB)) {
+			if (!pEnermy->m_bBlowingUp)
+				--m_pPlayer->m_iLife;
+			pEnermy->m_bBlowingUp = true;
+			pEnermy->m_fElapsedTimes = pEnermy->m_fDuration;
+		}
+	}
+}
+
+void CNomalStage::CheckBnousObjectByWallCollision()
+{
+	for (std::shared_ptr<CBonusObject> & pBonusObject : m_plBonusObjects) {
+			if (!pBonusObject->m_xmOOBB.Intersects(m_pWallsObject->m_xmOOBB)) {
+				pBonusObject->m_xmf3MovingDirection = Vector3::Subtract(XMFLOAT3(0, 0, 0), pBonusObject->m_xmf3MovingDirection);
+			}
+	}
+}
+
 void CNomalStage::ResponObject(float fElapsedTime)
 {
 	CExplosiveObject::PrepareExplosion();
@@ -216,6 +250,7 @@ void CNomalStage::ResponObject(float fElapsedTime)
 		BonusObject->SetMesh(pObjectCubeMesh);
 		BonusObject->SetColor(RGB(225, 35, 35));
 		BonusObject->SetPosition(XMFLOAT3(ufr(dre), ufr(dre), m_pPlayer->GetPosition().z + 145 + ufr(dre)));
+		BonusObject->SetMovingDirection(XMFLOAT3(ufr(dre), ufr(dre), 0));
 		BonusObject->SetMovingSpeed(BONUSOBJECTSPEED);
 		BonusObject->SetRotationAxis(XMFLOAT3(ufrRotaionAngle(dre), ufrRotaionAngle(dre), ufrRotaionAngle(dre)));
 		BonusObject->SetRotationSpeed(120);
@@ -242,5 +277,15 @@ void CNomalStage::ResponObject(float fElapsedTime)
 		//delete Enermy;
 	}
 
+}
+
+void CNomalStage::RemoveEnermy()
+{
+	RemoveExplosionObject(m_plEnermys)
+}
+
+void CNomalStage::RemoveBonusObject()
+{
+	RemoveExplosionObject(m_plBonusObjects)
 }
 
