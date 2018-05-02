@@ -42,11 +42,18 @@ void CPlayer::SetCameraOffset(XMFLOAT3& xmf3CameraOffset)
 
 void CPlayer::Move(DWORD dwDirection, float elapse_time)
 {
-
+	UINT orderCnt = 0;
 	float fDistance = m_fMovingSpeed * elapse_time;
 	if (dwDirection)
 	{
+		if (dwDirection & DIR_FORWARD) ++orderCnt;
+		if (dwDirection & DIR_BACKWARD)  ++orderCnt;
+		if (dwDirection & DIR_RIGHT)  ++orderCnt;
+		if (dwDirection & DIR_LEFT)  ++orderCnt;
+
+
 		XMFLOAT3 xmf3Shift = XMFLOAT3(0, 0, 0);
+		fDistance = fDistance / orderCnt;
 		if (dwDirection & DIR_FORWARD) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Look, fDistance);
 		if (dwDirection & DIR_BACKWARD) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Look, -fDistance);
 		if (dwDirection & DIR_RIGHT) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Right, fDistance);
@@ -125,7 +132,13 @@ void CPlayer::Animate(float fElapsedTime)
 {
 	ReloadBullet(fElapsedTime);
 	m_fBulletCooltime -= fElapsedTime;
-	CGameObject::Animate(fElapsedTime);
+	m_fBombCooltime -= fElapsedTime;
+
+	if (m_pMesh)
+	{
+		m_pMesh->m_xmOOBB.Transform(m_xmOOBB, XMLoadFloat4x4(&m_xmf4x4World));
+		XMStoreFloat4(&m_xmOOBB.Orientation, XMQuaternionNormalize(XMLoadFloat4(&m_xmOOBB.Orientation)));
+	}
 }
 
 void CPlayer::Render(HDC hDCFrameBuffer, CCamera *pCamera)
@@ -142,7 +155,7 @@ void CPlayer::Render(HDC hDCFrameBuffer, CCamera *pCamera)
 
 bool CPlayer::CanShot()
 {
-	if (m_bShotBullet && m_iBulletNum > 0 && m_fBulletCooltime < 0 && !m_bReload) {
+	if (m_bShotBullet && m_iBulletNum > 0 && m_fBulletCooltime < 0) {
 		m_bShotBullet = false;
 		return true;
 	}
@@ -181,11 +194,16 @@ void CPlayer::ReloadBullet(float fElapseTime)
 
 bool CPlayer::ShotBomb()
 {
-	if (m_iBombNum > 0) {
+	bool isTrue = false;
+	if (m_iBombNum > 0 && m_bShotBomb && m_fBombCooltime < 0) {
 		--m_iBombNum;
-		return true;
+		isTrue = true;
+		m_fBombCooltime = m_fBombInitCooltime;
 	}
-	return false;
+	m_bShotBomb = false;
+
+	return isTrue;
+
 }
 
 

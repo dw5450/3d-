@@ -150,9 +150,8 @@ void CGameFramework::BuildObjects()
 	m_pPlayer->SetMovingSpeed(PLAYER_SPEED);
 	
 	m_pScene = new CNomalStage();
-	m_pScene->BuildObjects();
-
 	m_pScene->m_pPlayer = m_pPlayer;
+	m_pScene->BuildObjects();
 }
 
 void CGameFramework::ReleaseObjects()
@@ -188,6 +187,7 @@ void CGameFramework::ProcessInput()
 		if (pKeyBuffer['D'] & 0xF0) dwDirection |= DIR_RIGHT;
 		if (pKeyBuffer[VK_CONTROL] & 0xF0) m_pPlayer->m_bShotBullet = true;
 		if (pKeyBuffer['R'] & 0xF0) m_pPlayer->m_bReload = true;
+		if (pKeyBuffer['Q'] & 0xF0) m_pPlayer->m_bShotBomb = true;
 	
 	}
 	float cxDelta = 0.0f, cyDelta = 0.0f;
@@ -243,6 +243,11 @@ void CGameFramework::FrameAdvance()
 		DestroyWindow(m_hWnd);
 		::PostQuitMessage(0);
 	}
+
+	if (m_pPlayer->GetPosition().z > 1000.0f) {
+		delete m_pScene;
+	}
+
 }
 
 

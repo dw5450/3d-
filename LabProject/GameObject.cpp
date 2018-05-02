@@ -89,6 +89,7 @@ void CGameObject::MoveForward(float fDistance)
 {
 	XMFLOAT3 xmf3Position = GetPosition();
 	XMFLOAT3 xmf3LookAt = GetLook();
+	
 	xmf3Position = Vector3::Add(xmf3Position, Vector3::ScalarProduct(xmf3LookAt, fDistance));
 	CGameObject::SetPosition(xmf3Position);
 }
@@ -146,6 +147,14 @@ CWallsObject::~CWallsObject()
 {
 }
 
+void CWallsObject::Animate(float fElapsedTime)
+{
+	if (m_pMesh)
+	{
+		m_pMesh->m_xmOOBB.Transform(m_xmOOBB, XMLoadFloat4x4(&m_xmf4x4World));
+		XMStoreFloat4(&m_xmOOBB.Orientation, XMQuaternionNormalize(XMLoadFloat4(&m_xmOOBB.Orientation)));
+	}
+}
 
 ////////////////////////////////////////EXPLOSION//////////////////////////////////////////////////
 //

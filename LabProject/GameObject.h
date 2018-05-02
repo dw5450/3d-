@@ -116,8 +116,11 @@ public:
 	CWallsObject();
 	virtual ~CWallsObject();
 
+
 public:
-	XMFLOAT4					m_pxmf4WallPlanes[6];
+	XMFLOAT4		m_pxmf4WallPlanes[6];
+
+	virtual void Animate(float fElapsedTime);
 };
 
 
