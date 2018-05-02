@@ -256,6 +256,19 @@ CBullet::~CBullet()
 {
 
 }
+bool CBullet::ChecksShootingRange() {
+	if (m_fShootingRange < 0)
+		return true;
+
+	return false;
+}
+
+
+void CBullet::Animate(float fElapsedTime)
+{
+	CGameObject::Animate(fElapsedTime);
+	m_fShootingRange -= fElapsedTime * m_fMovingSpeed;
+}
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 

@@ -75,4 +75,5 @@ public:
 
 	void RemoveEnermy();
 	void RemoveBonusObject();
+	void RemoveBullet();
 };

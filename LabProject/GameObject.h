@@ -131,7 +131,13 @@ public:
 	virtual ~CBullet();
 
 public:
-	float	fElapseTime = 0.0f;								//경과 시간.
+	//float	fElapseTime = 0.0f;								//경과 시간.
+	float m_fShootingRange = 100.0f ;
+	float m_fMaxShootingRange = 100.0f;
+	bool ChecksShootingRange();
+
+
+	virtual void Animate(float fElapsedTime);
 
 
 };

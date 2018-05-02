@@ -123,6 +123,8 @@ void CNomalStage::Animate(float fElapsedTime)
 
 	RemoveEnermy();
 	RemoveBonusObject();
+	RemoveBullet();
+	
 
 }
 
@@ -244,16 +246,22 @@ void CNomalStage::CheckBonusObjectBulletCollisions()
 void CNomalStage::CheckPlayerByEnermyCollisions()
 {
 	bool isEnermyBackPlayer = false;
-	for (std::shared_ptr<CEnermy> & pEnermy : m_plEnermys) {
+	auto itor = m_plEnermys.begin();
 
-		if (pEnermy->GetPosition().z < m_pPlayer->GetPosition().z)
+	for (;itor != m_plEnermys.end();)
+	{
+		std::shared_ptr<CEnermy> & pEnermy = *itor;
+		if(pEnermy->GetPosition().z < m_pPlayer->GetPosition().z)
 			isEnermyBackPlayer = true;
-		if(m_pPlayer->m_xmOOBB.Intersects(pEnermy->m_xmOOBB)) {
-			if (!pEnermy->m_bBlowingUp)
+
+		if (m_pPlayer->m_xmOOBB.Intersects(pEnermy->m_xmOOBB)) {
+			if (!pEnermy->m_bBlowingUp) {
 				--m_pPlayer->m_iLife;
-			pEnermy->m_bBlowingUp = true;
-			pEnermy->m_fElapsedTimes = pEnermy->m_fDuration;
+				itor = m_plEnermys.erase(itor);
+			}
+			else ++itor;
 		}
+		else ++itor;
 	}
 
 	if (isEnermyBackPlayer)
@@ -332,5 +340,18 @@ void CNomalStage::RemoveEnermy()
 void CNomalStage::RemoveBonusObject()
 {
 	RemoveExplosionObject(m_plBonusObjects)
+}
+
+void CNomalStage::RemoveBullet()
+{
+	auto itor = m_plBullets.begin();
+	for (;itor != m_plBullets.end();)
+	{
+		std::shared_ptr<CBullet> pBullet = *itor;
+		if (pBullet->ChecksShootingRange())
+			itor = m_plBullets.erase(itor);
+		
+		else  ++itor;
+	}
 }
 
