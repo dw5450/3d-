@@ -279,3 +279,12 @@ void CEnermy::TraceObject(CGameObject * pObejct)
 	XMStoreFloat3(&m_xmf3MovingDirection, movingDirection);
 
 }
+
+bool CBoss::CanShot()
+{
+	if (m_fBulletCooltime < 0) {
+		return true;
+	}
+
+	return false;
+}

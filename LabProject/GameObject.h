@@ -99,7 +99,31 @@ public:
 	void TraceObject(CGameObject * );
 
 
+
 };
+
+class CBoss : public CEnermy
+{
+public:
+	CBoss() {};
+	virtual ~CBoss() {};
+
+public:
+
+	void TraceObject(CGameObject *);
+	
+	float m_fBulletCooltime = 0.3f;
+	float m_fBulletInitCooltime = 0.3f;
+
+	bool m_bShotBullet = false;
+	bool CanShot();
+	
+
+
+
+};
+
+
 
 class CBonusObject : public CExplosiveObject
 {

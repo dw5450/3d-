@@ -51,6 +51,7 @@ public:
 
 public:
 	CWallsObject		*m_pWallsObject = NULL;
+	CBoss				*m_pBoss = NULL;
 	std::list<std::shared_ptr<CBullet>>				m_plBullets;
 	std::list<std::shared_ptr<CEnermy>>				m_plEnermys;
 	std::list<std::shared_ptr<CBonusObject>>		m_plBonusObjects;
