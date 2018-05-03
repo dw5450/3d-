@@ -280,11 +280,35 @@ void CEnermy::TraceObject(CGameObject * pObejct)
 
 }
 
+void CBoss::Animate(float fElapseTime)
+{
+	CGameObject::Animate(fElapseTime);
+	m_fBulletCooltime -= fElapseTime;
+
+}
+
 bool CBoss::CanShot()
 {
-	if (m_fBulletCooltime < 0) {
+	if ( m_fBulletCooltime < 0) {
+		m_fBulletCooltime = m_fBulletInitCooltime;
+		m_bShotBullet = false;
 		return true;
 	}
 
 	return false;
+}
+
+CBullet * CBoss::ShotBullet()
+{
+	CCubeMesh *pObjectCubeMesh = new CCubeMesh(1.0f, 1.0f, 1.0f);
+	CBullet * pBullet = new CBullet;
+	pBullet->SetMesh(pObjectCubeMesh);
+	pBullet->SetColor(RGB(255, 0, 0));
+	pBullet->SetMovingSpeed(60);
+	pBullet->SetRotationSpeed(600.0f);
+	pBullet->SetPosition(GetPosition());
+	pBullet->SetMovingDirection(m_xmf3MovingDirection);
+	pBullet->MoveForward(4);
+	pBullet->SetRotationAxis(m_xmf3MovingDirection);
+	return pBullet;
 }

@@ -69,9 +69,11 @@ public:
 	void CheckEnermyByBulletCollisions();
 	void CheckBonusObjectBulletCollisions();
 	void CheckPlayerByEnermyCollisions();
+	void CheckPlayerByBulletCollisions();
 
 
 	void ResponObject(float fElapsedTime);
+	void ResponBoss();
 	void ShotBullet(CGameObject * pObject, float & fBulletCoolTime,const float fBulletMaxCoolTime);
 
 	void RemoveEnermy();

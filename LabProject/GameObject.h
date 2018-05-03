@@ -62,6 +62,26 @@ public:
 };
 
 
+
+class CBullet : public CGameObject
+{
+public:
+	CBullet();
+	virtual ~CBullet();
+
+public:
+	//float	fElapseTime = 0.0f;								//경과 시간.
+	float m_fShootingRange = 100.0f;
+	float m_fMaxShootingRange = 100.0f;
+	bool ChecksShootingRange();
+
+
+	virtual void Animate(float fElapsedTime);
+
+
+};
+
+
 class CExplosiveObject : public CGameObject
 {
 public:
@@ -107,20 +127,16 @@ class CBoss : public CEnermy
 public:
 	CBoss() {};
 	virtual ~CBoss() {};
+	virtual void Animate(float fElapseTime);
 
 public:
-
-	void TraceObject(CGameObject *);
 	
-	float m_fBulletCooltime = 0.3f;
-	float m_fBulletInitCooltime = 0.3f;
+	float m_fBulletCooltime = 0.5f;
+	float m_fBulletInitCooltime = 0.5f;
 
 	bool m_bShotBullet = false;
 	bool CanShot();
-	
-
-
-
+	CBullet * ShotBullet();
 };
 
 
@@ -145,23 +161,4 @@ public:
 	XMFLOAT4		m_pxmf4WallPlanes[6];
 
 	virtual void Animate(float fElapsedTime);
-};
-
-
-class CBullet : public CGameObject
-{
-public:
-	CBullet();
-	virtual ~CBullet();
-
-public:
-	//float	fElapseTime = 0.0f;								//경과 시간.
-	float m_fShootingRange = 100.0f ;
-	float m_fMaxShootingRange = 100.0f;
-	bool ChecksShootingRange();
-
-
-	virtual void Animate(float fElapsedTime);
-
-
 };

@@ -51,6 +51,7 @@ CNomalStage::CNomalStage()
 
 CNomalStage::~CNomalStage()
 {
+	if (m_pBoss) delete m_pBoss;
 }
 
 void CNomalStage::BuildObjects()
@@ -95,44 +96,54 @@ void CNomalStage::Animate(float fElapsedTime)
 
 	m_pWallsObject->Animate(fElapsedTime);
 	m_pPlayer->Animate(fElapsedTime);
+
+	if (m_pBoss) {
+		m_pBoss->Animate(fElapsedTime);
+		m_pBoss->TraceObject(m_pPlayer);
+		if (m_pBoss->CanShot())	m_plBullets.emplace_back(m_pBoss->ShotBullet());
+	}
 	
 
 	for (std::shared_ptr<CBullet> & data : m_plBullets)
 		data->Animate(fElapsedTime);
 
+for (std::shared_ptr<CEnermy> & data : m_plEnermys) {
+	data->TraceObject(m_pPlayer);
+	data->Animate(fElapsedTime);
+}
+
+for (std::shared_ptr<CBonusObject> & data : m_plBonusObjects)
+data->Animate(fElapsedTime);
+
+if (m_pPlayer->ShotBomb()) {
 	for (std::shared_ptr<CEnermy> & data : m_plEnermys) {
-		data->TraceObject(m_pPlayer);
-		data->Animate(fElapsedTime);
+		data->m_bBlowingUp = true;
 	}
+}
 
-	for (std::shared_ptr<CBonusObject> & data : m_plBonusObjects)
-		data->Animate(fElapsedTime);
+CheckPlayerByWallCollision(fElapsedTime);
+CheckBulletByWallCollision();
+CheckBnousObjectByWallCollision();
+CheckEnermyByBulletCollisions();
+CheckBonusObjectBulletCollisions();
+CheckPlayerByEnermyCollisions();
+CheckPlayerByBulletCollisions();
 
-	if (m_pPlayer->ShotBomb()) {
-		for (std::shared_ptr<CEnermy> & data : m_plEnermys) {
-			data->m_bBlowingUp = true;
-		}
-	}
+RemoveEnermy();
+RemoveBonusObject();
+RemoveBullet();
 
-	CheckPlayerByWallCollision(fElapsedTime);
-	CheckBulletByWallCollision();
-	CheckBnousObjectByWallCollision();
-	CheckEnermyByBulletCollisions();
-	CheckBonusObjectBulletCollisions();
-	CheckPlayerByEnermyCollisions();
-
-	RemoveEnermy();
-	RemoveBonusObject();
-	RemoveBullet();
-	
 
 }
 
 void CNomalStage::Render(HDC hDCFrameBuffer, CCamera * pCamera)
 {
 	m_pPlayer->Render(hDCFrameBuffer, pCamera);
-	
+
 	m_pWallsObject->Render(hDCFrameBuffer, pCamera);
+
+	if (m_pBoss)
+		m_pBoss->Render(hDCFrameBuffer, pCamera);
 
 	for (std::shared_ptr<CBullet> & data : m_plBullets)
 		data->Render(hDCFrameBuffer, pCamera);
@@ -162,7 +173,7 @@ void CNomalStage::CheckPlayerByWallCollision(float fElapseTime)
 			{
 				if (j < 4) {
 					XMVECTOR moveShift = -XMLoadFloat3(&m_pPlayer->m_xmf3MovingDirection);
-					moveShift =  moveShift * fElapseTime * m_pPlayer->m_fMovingSpeed;
+					moveShift = moveShift * fElapseTime * m_pPlayer->m_fMovingSpeed;
 					XMFLOAT3A result;
 					XMStoreFloat3(&result, moveShift);
 
@@ -175,13 +186,13 @@ void CNomalStage::CheckPlayerByWallCollision(float fElapseTime)
 	}
 
 	}
-	if (m_pPlayer->GetPosition().z < 3){
+	if (m_pPlayer->GetPosition().z < 3) {
 		m_pPlayer->m_xmf3Position.z = 3;
 	}
-
+	
 	if (m_pPlayer->GetPosition().z > 997) {
 		m_pPlayer->m_xmf3Position.z = 997;
-		
+
 	}
 
 	if (WALL_HALF_DEPTH< m_pPlayer->GetPosition().z && m_pPlayer->GetPosition().z < 1000.0f - WALL_HALF_DEPTH) {
@@ -195,8 +206,11 @@ void CNomalStage::CheckPlayerByWallCollision(float fElapseTime)
 				m_pWallsObject->SetPosition(XMFLOAT3(0, 0, m_pWallsObject->GetPosition().z - 25));
 			}
 		}
-		
-	}	
+	}
+
+	if (m_pPlayer->GetPosition().z > 800 && !m_pBoss)
+		ResponBoss();
+
 }
 
 void CNomalStage::CheckBulletByWallCollision()
@@ -270,6 +284,21 @@ void CNomalStage::CheckPlayerByEnermyCollisions()
 		m_pPlayer->SetColor(RGB(0, 0, 255));
 }
 
+void CNomalStage::CheckPlayerByBulletCollisions()
+{
+	auto itor = m_plBullets.begin();
+	for (;itor != m_plBullets.end();)
+	{
+		std::shared_ptr<CBullet> & pBullet = *itor;
+
+		if (m_pPlayer->m_xmOOBB.Intersects(pBullet->m_xmOOBB)) {
+			--m_pPlayer->m_iLife;
+			itor = m_plBullets.erase(itor);
+		}
+		else ++itor;
+	}
+}
+
 void CNomalStage::CheckBnousObjectByWallCollision()
 {
 	for (std::shared_ptr<CBonusObject> & pBonusObject : m_plBonusObjects) {
@@ -281,7 +310,7 @@ void CNomalStage::CheckBnousObjectByWallCollision()
 
 void CNomalStage::ResponObject(float fElapsedTime)
 {
-	if (m_pPlayer->GetPosition().z > 955)
+	if (m_pPlayer->GetPosition().z > 855)
 		return;
 	CExplosiveObject::PrepareExplosion();
 	CCubeMesh *pObjectCubeMesh = new CCubeMesh(2.0f, 2.0f, 2.0f);
@@ -330,6 +359,26 @@ void CNomalStage::ResponObject(float fElapsedTime)
 		//delete Enermy;
 	}
 
+}
+
+void CNomalStage::ResponBoss()
+{
+	CExplosiveObject::PrepareExplosion();
+	CCubeMesh *pObjectCubeMesh = new CCubeMesh(8.0f, 8.0f, 8.0f);
+	pObjectCubeMesh->SetOOBB(XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(8.0f, 8.0f, 8.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
+
+	m_fBonusObjectResponTime = m_fBonusObjectInitResponTime;
+	CBoss * BossObject = new CBoss;
+	BossObject->m_bActive = true;
+	BossObject->SetMesh(pObjectCubeMesh);
+	BossObject->SetColor(RGB(180, 82, 162));
+	BossObject->SetPosition(XMFLOAT3(0, 0, 990));
+	BossObject->SetMovingDirection(XMFLOAT3(0,0, -1));
+	BossObject->SetMovingSpeed(10);
+	BossObject->SetRotationAxis(BossObject->GetLook());
+	BossObject->SetRotationSpeed(120);
+
+	m_pBoss = BossObject;
 }
 
 void CNomalStage::RemoveEnermy()

@@ -220,7 +220,7 @@ void CGameFramework::FrameAdvance()
 {
 	if (!m_bActive) return;					//만약 엑티브 상태가 아닐시 프로그램을 실행하지 않습니다.
 
-	m_GameTimer.Tick(0.0f);					//게임의 시간
+	m_GameTimer.Tick(60.0f);					//게임의 시간
 
 	ProcessInput();							//키보드나 마우스의 입력을 받습니다.
 
@@ -243,11 +243,6 @@ void CGameFramework::FrameAdvance()
 		DestroyWindow(m_hWnd);
 		::PostQuitMessage(0);
 	}
-
-	if (m_pPlayer->GetPosition().z > 1000.0f) {
-		delete m_pScene;
-	}
-
 }
 
 

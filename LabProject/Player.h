@@ -52,12 +52,12 @@ public:		//skill
 	void ReloadBullet(float fElapseTime);
 
 
-	float					m_fBombCooltime = BULLETCOOLTIME;
-	float					m_fBombInitCooltime = BULLETCOOLTIME;
-	int m_iBombNum = 10;
+	float					m_fBombCooltime = 1.0f;
+	float					m_fBombInitCooltime = 1.0f;
+	int m_iBombNum = 3;
 	bool m_bShotBomb = false;
 	bool ShotBomb();
 
-	unsigned int m_iLife = 5;
+	unsigned int m_iLife = 10;
 };
 
