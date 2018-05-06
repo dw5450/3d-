@@ -4,7 +4,7 @@
 CPlayer::CPlayer()
 {
 	m_pCamera = new CCamera();
-	m_pCamera->GenerateProjectionMatrix(1.01f, 1000.0f, 60.0f);
+	m_pCamera->GenerateProjectionMatrix(1.01f, 1000.0f, 45.0f);
 	m_pCamera->SetViewport(0, 0, CLIENT_WIDTH, CLIENT_HEIGHT);
 
 
@@ -134,6 +134,8 @@ void CPlayer::Animate(float fElapsedTime)
 	m_fBulletCooltime -= fElapsedTime;
 	m_fBombCooltime -= fElapsedTime;
 
+	TracingEnermy();
+
 	if (m_pMesh)
 	{
 		m_pMesh->m_xmOOBB.Transform(m_xmOOBB, XMLoadFloat4x4(&m_xmf4x4World));
@@ -174,8 +176,8 @@ CBullet * CPlayer::ShotBullet()
 	pBullet->SetMovingSpeed(BULLETSPEED);
 	pBullet->SetRotationSpeed(600.0f);
 	pBullet->SetPosition(m_xmf3Position);
+	
 	pBullet->SetMovingDirection(m_xmf3Look);
-	pBullet->MoveForward(4);
 	pBullet->SetRotationAxis(m_xmf3Look);
 	m_fBulletCooltime = m_fBulletInitCooltime;
 	return pBullet;
@@ -205,6 +207,43 @@ bool CPlayer::ShotBomb()
 
 	return isTrue;
 
+}
+
+void CPlayer::PickingEnermy(const std::list<std::shared_ptr<CEnermy>>& plEnermy)
+{
+	XMVECTOR vecPosition = XMLoadFloat3(&m_pCamera->m_xmf3Position);
+	XMFLOAT4X4 CanraWorldMatrix;
+
+	CanraWorldMatrix._11 = m_pCamera->m_xmf3Right.x;	CanraWorldMatrix._12 = m_pCamera->m_xmf3Right.y; CanraWorldMatrix._13 = m_pCamera->m_xmf3Right.z;
+	CanraWorldMatrix._21 = m_pCamera->m_xmf3Up.x;		CanraWorldMatrix._22 = m_pCamera->m_xmf3Up.y;	 CanraWorldMatrix._23 = m_pCamera->m_xmf3Up.z;
+	CanraWorldMatrix._31 = m_pCamera->m_xmf3Look.x;		CanraWorldMatrix._32 = m_pCamera->m_xmf3Look.y;	 CanraWorldMatrix._33 = m_pCamera->m_xmf3Look.z;
+	CanraWorldMatrix._41 = 0;
+	CanraWorldMatrix._42 = 0;
+	CanraWorldMatrix._43 = 0;
+	XMFLOAT3 Result;
+	Result = Vector3::TransformNormal(m_xmf3PickRay, CanraWorldMatrix);
+	XMVECTOR vecPickingRay = XMLoadFloat3(&Result);
+
+	float distance = 10000.0f;
+	float nearPickedZ = 10000.f;
+	for (const std::shared_ptr<CEnermy> & data : plEnermy) 
+		if (data->m_xmOOBB.Intersects(vecPosition, vecPickingRay, distance) && data->GetPosition().z <nearPickedZ) {
+			m_pTracingObject = data;
+			m_bTraceEnermy = true;
+		}
+
+}
+
+void CPlayer::TracingEnermy()
+{
+	if (m_bTraceEnermy) {
+		m_xmf3Look =Vector3::Normalize( Vector3::Subtract(m_pTracingObject->GetPosition() ,m_xmf3Position));
+		m_xmf3Right = Vector3::CrossProduct(m_xmf3Look, XMFLOAT3(0, -1, 0));
+		m_xmf3Up = Vector3::CrossProduct(m_xmf3Look, m_xmf3Right);
+	
+
+		
+	}
 }
 
 

@@ -1,0 +1,15 @@
+﻿  stdafx.cpp
+  Timer.cpp
+  Scene.cpp
+c:\users\원동욱\desktop\3d 과제\labproject\scene.cpp(311): warning C4244: '=': 'double'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+c:\users\원동욱\desktop\3d 과제\labproject\scene.cpp(312): warning C4244: '=': 'double'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+  Player.cpp
+  Mesh.cpp
+  LabProject.cpp
+  GameObject.cpp
+  GameFramework.cpp
+c:\users\원동욱\desktop\3d 과제\labproject\gameframework.cpp(207): warning C4244: '인수': 'LONG'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+  Camera.cpp
+  코드를 생성하고 있습니다...
+Camera.obj : warning LNK4075: '/EDITANDCONTINUE'이(가) '/INCREMENTAL:NO' 사양으로 인해 무시됩니다.
+  LabProject.vcxproj -> C:\Users\원동욱\Desktop\3d 과제\Debug\LabProject.exe

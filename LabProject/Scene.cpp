@@ -94,6 +94,7 @@ void CNomalStage::Animate(float fElapsedTime)
 	if (m_pPlayer->CanShot())
 		m_plBullets.emplace_back(m_pPlayer->ShotBullet());
 
+
 	m_pWallsObject->Animate(fElapsedTime);
 	m_pPlayer->Animate(fElapsedTime);
 
@@ -108,7 +109,7 @@ void CNomalStage::Animate(float fElapsedTime)
 		data->Animate(fElapsedTime);
 
 for (std::shared_ptr<CEnermy> & data : m_plEnermys) {
-	data->TraceObject(m_pPlayer);
+	//data->TraceObject(m_pPlayer);
 	data->Animate(fElapsedTime);
 }
 
@@ -127,7 +128,7 @@ CheckBnousObjectByWallCollision();
 CheckEnermyByBulletCollisions();
 CheckBonusObjectBulletCollisions();
 CheckPlayerByEnermyCollisions();
-CheckPlayerByBulletCollisions();
+//CheckPlayerByBulletCollisions();
 
 RemoveEnermy();
 RemoveBonusObject();
@@ -280,8 +281,8 @@ void CNomalStage::CheckPlayerByEnermyCollisions()
 
 	if (isEnermyBackPlayer)
 		m_pPlayer->SetColor(RGB(255, 0, 0));
-	else
-		m_pPlayer->SetColor(RGB(0, 0, 255));
+	//else
+		//m_pPlayer->SetColor(RGB(0, 0, 255));
 }
 
 void CNomalStage::CheckPlayerByBulletCollisions()
@@ -297,6 +298,23 @@ void CNomalStage::CheckPlayerByBulletCollisions()
 		}
 		else ++itor;
 	}
+}
+
+XMFLOAT3 CNomalStage::GetPickRay(float xScreen, float yScreen)
+{
+	CCamera * pCamera = m_pPlayer->m_pCamera;
+	float Left = (float)pCamera->m_Viewport.m_xStart;
+	float Top = (float)pCamera->m_Viewport.m_yStart;
+	XMFLOAT3 MouseFarPosition(0, 0, 0);
+	float Width = (float)pCamera->m_Viewport.m_nWidth;
+	float Height = (float)pCamera->m_Viewport.m_nHeight;
+	////투영 좌표계로 
+	MouseFarPosition.x = (float)(((2.0f * (xScreen - Left)) / Width) - 1.03);
+	MouseFarPosition.y = (float)((-(2.0f * (yScreen - Top)) / Height) + 1.12);
+	XMFLOAT4X4 InvProj(Matrix4x4::Inverse(pCamera->m_xmf4x4Projection));
+	MouseFarPosition = Vector3::TransformCoord(MouseFarPosition, InvProj);
+	MouseFarPosition.z = 1.0f;
+	return Vector3::Normalize( MouseFarPosition);
 }
 
 void CNomalStage::CheckBnousObjectByWallCollision()
@@ -350,6 +368,7 @@ void CNomalStage::ResponObject(float fElapsedTime)
 		Enermy->SetMesh(pObjectCubeMesh);
 		Enermy->SetColor(RGB(235 * randEnermy, 0, 235));
 		Enermy->SetPosition(XMFLOAT3(ufr(dre), ufr(dre), m_pPlayer->GetPosition().z + 145 + ufr(dre)));
+		Enermy->SetMovingDirection(XMFLOAT3(0, 0, 0));
 		Enermy->SetMovingSpeed(ENERMYSPEED + randEnermy* ENERMYSPEED);
 		Enermy->SetRotationAxis(XMFLOAT3(ufrRotaionAngle(dre), ufrRotaionAngle(dre), ufrRotaionAngle(dre)));
 		Enermy->SetRotationSpeed(120);

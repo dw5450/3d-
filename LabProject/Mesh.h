@@ -56,6 +56,7 @@ class CCubeMesh : public CMesh
 public:
 	CCubeMesh(float fWidth = 4.0f, float fHeight = 4.0f, float fDepth = 4.0f);
 	virtual ~CCubeMesh();
+
 };
 
 class CWallMesh : public CMesh

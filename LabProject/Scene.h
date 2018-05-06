@@ -55,8 +55,7 @@ public:
 	std::list<std::shared_ptr<CBullet>>				m_plBullets;
 	std::list<std::shared_ptr<CEnermy>>				m_plEnermys;
 	std::list<std::shared_ptr<CBonusObject>>		m_plBonusObjects;
-
-
+	
 	float				m_fEnermyResponInitTime = ENERMYRESPONTIME;
 	float				m_fEnermyResponTime = ENERMYRESPONTIME;
 	float				m_fBonusObjectInitResponTime = BONOUSOBJECTRESPONTIME;
@@ -71,10 +70,13 @@ public:
 	void CheckPlayerByEnermyCollisions();
 	void CheckPlayerByBulletCollisions();
 
+	XMFLOAT3 GetPickRay(float fMouseX, float fMouseY);
 
 	void ResponObject(float fElapsedTime);
 	void ResponBoss();
 	void ShotBullet(CGameObject * pObject, float & fBulletCoolTime,const float fBulletMaxCoolTime);
+
+
 
 	void RemoveEnermy();
 	void RemoveBonusObject();

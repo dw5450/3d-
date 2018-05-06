@@ -192,6 +192,7 @@ void CGameFramework::ProcessInput()
 	}
 	float cxDelta = 0.0f, cyDelta = 0.0f;
 	POINT ptCursorPos;
+
 	if (GetCapture() == m_hWnd)
 	{
 		SetCursor(NULL);
@@ -200,14 +201,23 @@ void CGameFramework::ProcessInput()
 		cyDelta = (float)(ptCursorPos.y - m_ptOldCursorPos.y) / 3.0f;
 		SetCursorPos(m_ptOldCursorPos.x, m_ptOldCursorPos.y);
 	}
+
+	if (pKeyBuffer[VK_LBUTTON] & 0xF0) {
+		CNomalStage * nc = (CNomalStage *)m_pScene;
+		m_pPlayer->m_xmf3PickRay = nc->GetPickRay(ptCursorPos.x, ptCursorPos.y);
+		m_pPlayer->PickingEnermy(nc->m_plEnermys);
+	}
 	if ((dwDirection != 0) || (cxDelta != 0.0f) || (cyDelta != 0.0f))
 	{
 		if (cxDelta || cyDelta)
 		{
-			if (pKeyBuffer[VK_RBUTTON] & 0xF0)
+			if (pKeyBuffer[VK_RBUTTON] & 0xF0) {
 				m_pPlayer->Rotate(cyDelta, cxDelta, 0.0f);
-			else
-				m_pPlayer->Rotate(cyDelta, cxDelta, 0.0f);
+				m_pPlayer->m_bTraceEnermy = false;
+
+			}
+			//else 
+				//m_pPlayer->Rotate(cyDelta, cxDelta, 0.0f);
 		}
 		if (dwDirection){
 			m_pPlayer->Move(dwDirection, m_GameTimer.GetTimeElapsed());
@@ -220,7 +230,7 @@ void CGameFramework::FrameAdvance()
 {
 	if (!m_bActive) return;					//만약 엑티브 상태가 아닐시 프로그램을 실행하지 않습니다.
 
-	m_GameTimer.Tick(60.0f);					//게임의 시간
+	m_GameTimer.Tick(00.0f);					//게임의 시간
 
 	ProcessInput();							//키보드나 마우스의 입력을 받습니다.
 

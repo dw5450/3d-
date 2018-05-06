@@ -58,6 +58,14 @@ public:		//skill
 	bool m_bShotBomb = false;
 	bool ShotBomb();
 
+	bool m_bTraceEnermy = false;
+	std::shared_ptr<CGameObject> m_pTracingObject;
+	XMFLOAT3 m_xmf3PickRay = XMFLOAT3(0, 0, 0);
+	void PickingEnermy(const std::list<std::shared_ptr<CEnermy>> &);
+	void TracingEnermy();
+
 	unsigned int m_iLife = 10;
+
+
 };
 
