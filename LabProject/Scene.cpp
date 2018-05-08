@@ -107,17 +107,22 @@ void CNomalStage::Animate(float fElapsedTime)
 
 	for (std::shared_ptr<CBullet> & data : m_plBullets)
 		data->Animate(fElapsedTime);
-
-for (std::shared_ptr<CEnermy> & data : m_plEnermys) {
-	if (m_pPlayer->m_xmf3Look.z > 0) {
-		if (m_pPlayer->m_xmf3Position.z + 150 < data->GetPosition().z) data->LOD = 3;
-		else if(m_pPlayer->m_xmf3Position.z + 75 < data->GetPosition().z) data->LOD = 2;
-		else data->LOD = 1;
+	float LOD2 = 200;
+	float LOD3 = 400;
+	if (m_plEnermys.size() != 0) {
+		float LOD2 = 200 / m_plEnermys.size();
+		float LOD3 = 400 / m_plEnermys.size();
 	}
+	for (std::shared_ptr<CEnermy> & data : m_plEnermys) {
+		if (m_pPlayer->m_xmf3Look.z > 0) {
+			if (m_pPlayer->m_xmf3Position.z + LOD3 < data->GetPosition().z) data->LOD = 3;
+			else if(m_pPlayer->m_xmf3Position.z + LOD2 < data->GetPosition().z) data->LOD = 2;
+			else data->LOD = 1;
+		}
 
 	if (m_pPlayer->m_xmf3Look.z < 0) {
-		if (m_pPlayer->m_xmf3Position.z - 150 > data->GetPosition().z) data->LOD = 3;
-		else if (m_pPlayer->m_xmf3Position.z - 75 > data->GetPosition().z) data->LOD = 2;
+		if (m_pPlayer->m_xmf3Position.z - LOD3 > data->GetPosition().z) data->LOD = 3;
+		else if (m_pPlayer->m_xmf3Position.z - LOD2 > data->GetPosition().z) data->LOD = 2;
 		else data->LOD = 1;
 	}
 	data->TraceObject(m_pPlayer);
@@ -206,6 +211,8 @@ void CNomalStage::CheckPlayerByWallCollision(float fElapseTime)
 		m_pPlayer->m_xmf3Position.z = 997;
 
 	}
+
+
 	if (WALL_HALF_DEPTH< m_pPlayer->GetPosition().z && m_pPlayer->GetPosition().z < 1000.0f - WALL_HALF_DEPTH) {
 		if (m_pPlayer->GetPosition().z > m_pWallsObject->GetPosition().z) {
 			if (m_pPlayer->m_xmf3MovingDirection.z > 0) {
@@ -218,8 +225,15 @@ void CNomalStage::CheckPlayerByWallCollision(float fElapseTime)
 			}
 		}
 	}
-	
 
+	if (m_pPlayer->GetPosition().z < 1000.0f - WALL_HALF_DEPTH) {
+		if (m_pPlayer->GetPosition().z > m_pWallsObject->GetPosition().z) {
+			if (m_pPlayer->m_xmf3MovingDirection.z > 0) {
+				m_pWallsObject->SetPosition(XMFLOAT3(0, 0, m_pWallsObject->GetPosition().z + 25));
+			}
+		}
+	}
+	
 	if (m_pPlayer->GetPosition().z > 800 && !m_pBoss)
 		ResponBoss();
 
