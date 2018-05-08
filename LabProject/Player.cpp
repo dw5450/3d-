@@ -176,7 +176,7 @@ CBullet * CPlayer::ShotBullet()
 	pBullet->SetMovingSpeed(BULLETSPEED);
 	pBullet->SetRotationSpeed(600.0f);
 	pBullet->SetPosition(m_xmf3Position);
-	
+	pBullet->MoveForward(4);
 	pBullet->SetMovingDirection(m_xmf3Look);
 	pBullet->SetRotationAxis(m_xmf3Look);
 	m_fBulletCooltime = m_fBulletInitCooltime;
@@ -236,13 +236,25 @@ void CPlayer::PickingEnermy(const std::list<std::shared_ptr<CEnermy>>& plEnermy)
 
 void CPlayer::TracingEnermy()
 {
+	static int num = 0;
 	if (m_bTraceEnermy) {
-		m_xmf3Look =Vector3::Normalize( Vector3::Subtract(m_pTracingObject->GetPosition() ,m_xmf3Position));
+		XMFLOAT3 EndLook = Vector3::Normalize(Vector3::Subtract(m_pTracingObject->GetPosition(), m_xmf3Position));
+		XMFLOAT3 RotationDirection = Vector3::Normalize(Vector3::Subtract(EndLook, m_xmf3Look));
+		XMFLOAT3 RotaitionAdd;
+		RotaitionAdd = Vector3::ScalarProduct(RotationDirection, 0.01f);
+
+		if (EndLook.x > m_xmf3Look.x && m_xmf3Look.x + RotaitionAdd.x > EndLook.x) {
+			m_xmf3Look = EndLook;
+		}
+		else if(EndLook.x < m_xmf3Look.x && m_xmf3Look.x + RotaitionAdd.x < EndLook.x) {
+			m_xmf3Look = EndLook;
+		}
+
+		else m_xmf3Look = Vector3::Add(m_xmf3Look, RotaitionAdd);
 		m_xmf3Right = Vector3::CrossProduct(m_xmf3Look, XMFLOAT3(0, -1, 0));
 		m_xmf3Up = Vector3::CrossProduct(m_xmf3Look, m_xmf3Right);
 	
 
-		
 	}
 }
 

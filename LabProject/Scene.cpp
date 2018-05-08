@@ -109,7 +109,7 @@ void CNomalStage::Animate(float fElapsedTime)
 		data->Animate(fElapsedTime);
 
 for (std::shared_ptr<CEnermy> & data : m_plEnermys) {
-	//data->TraceObject(m_pPlayer);
+	data->TraceObject(m_pPlayer);
 	data->Animate(fElapsedTime);
 }
 
@@ -128,7 +128,7 @@ CheckBnousObjectByWallCollision();
 CheckEnermyByBulletCollisions();
 CheckBonusObjectBulletCollisions();
 CheckPlayerByEnermyCollisions();
-//CheckPlayerByBulletCollisions();
+CheckPlayerByBulletCollisions();
 
 RemoveEnermy();
 RemoveBonusObject();
