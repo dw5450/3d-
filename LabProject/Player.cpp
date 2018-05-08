@@ -138,8 +138,8 @@ void CPlayer::Animate(float fElapsedTime)
 
 	if (m_pMesh)
 	{
-		m_pMesh->m_xmOOBB.Transform(m_xmOOBB, XMLoadFloat4x4(&m_xmf4x4World));
-		XMStoreFloat4(&m_xmOOBB.Orientation, XMQuaternionNormalize(XMLoadFloat4(&m_xmOOBB.Orientation)));
+		m_pMesh->m_xmAABB.Transform(m_xmAABB, XMLoadFloat4x4(&m_xmf4x4World));
+		//XMStoreFloat4(&m_xmAABB.Orientation, XMQuaternionNormalize(XMLoadFloat4(&m_xmAABB.Orientation)));
 	}
 }
 
@@ -227,7 +227,7 @@ void CPlayer::PickingEnermy(const std::list<std::shared_ptr<CEnermy>>& plEnermy)
 	float distance = 10000.0f;
 	float nearPickedZ = 10000.f;
 	for (const std::shared_ptr<CEnermy> & data : plEnermy) 
-		if (data->m_xmOOBB.Intersects(vecPosition, vecPickingRay, distance) && data->GetPosition().z <nearPickedZ) {
+		if (data->m_xmAABB.Intersects(vecPosition, vecPickingRay, distance) && data->GetPosition().z <nearPickedZ) {
 			m_pTracingObject = data;
 			m_bTraceEnermy = true;
 		}

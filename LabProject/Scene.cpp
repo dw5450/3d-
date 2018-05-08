@@ -63,7 +63,7 @@ void CNomalStage::BuildObjects()
 	//벽설정
 	float fHalfWidth = 45.0f, fHalfHeight = 45.0f, fHalfDepth = WALL_HALF_DEPTH;									//1.0f 당 1m
 	CWallMesh *pWallCubeMesh = new CWallMesh(fHalfWidth * 2.0f, fHalfHeight * 2.0f, fHalfDepth * 2.0f, 20);
-	pWallCubeMesh->SetOOBB(XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(fHalfWidth, fHalfHeight, fHalfDepth), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
+	pWallCubeMesh->SetAABB(XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(fHalfWidth, fHalfHeight, fHalfDepth));
 
 	m_pWallsObject = new CWallsObject();
 	
@@ -109,6 +109,17 @@ void CNomalStage::Animate(float fElapsedTime)
 		data->Animate(fElapsedTime);
 
 for (std::shared_ptr<CEnermy> & data : m_plEnermys) {
+	if (m_pPlayer->m_xmf3Look.z > 0) {
+		if (m_pPlayer->m_xmf3Position.z + 150 < data->GetPosition().z) data->LOD = 3;
+		else if(m_pPlayer->m_xmf3Position.z + 75 < data->GetPosition().z) data->LOD = 2;
+		else data->LOD = 1;
+	}
+
+	if (m_pPlayer->m_xmf3Look.z < 0) {
+		if (m_pPlayer->m_xmf3Position.z - 150 > data->GetPosition().z) data->LOD = 3;
+		else if (m_pPlayer->m_xmf3Position.z - 75 > data->GetPosition().z) data->LOD = 2;
+		else data->LOD = 1;
+	}
 	data->TraceObject(m_pPlayer);
 	data->Animate(fElapsedTime);
 }
@@ -158,7 +169,7 @@ void CNomalStage::Render(HDC hDCFrameBuffer, CCamera * pCamera)
 
 void CNomalStage::CheckPlayerByWallCollision(float fElapseTime)
 {
-	ContainmentType containType = m_pWallsObject->m_xmOOBB.Contains(m_pPlayer->m_xmOOBB);					//벽으로 충돌을 체크
+	ContainmentType containType = m_pWallsObject->m_xmAABB.Contains(m_pPlayer->m_xmAABB);					//벽으로 충돌을 체크
 	switch (containType)
 	{
 	case CONTAINS:					//포함될 경우
@@ -169,7 +180,7 @@ void CNomalStage::CheckPlayerByWallCollision(float fElapseTime)
 		int nPlaneIndex = -1;
 		for (int j = 0; j < 6; j++)
 		{
-			PlaneIntersectionType intersectType = m_pPlayer->m_xmOOBB.Intersects(XMLoadFloat4(&m_pWallsObject->m_pxmf4WallPlanes[j]));
+			PlaneIntersectionType intersectType = m_pPlayer->m_xmAABB.Intersects(XMLoadFloat4(&m_pWallsObject->m_pxmf4WallPlanes[j]));
 			if (intersectType == INTERSECTING)
 			{
 				if (j < 4) {
@@ -195,7 +206,6 @@ void CNomalStage::CheckPlayerByWallCollision(float fElapseTime)
 		m_pPlayer->m_xmf3Position.z = 997;
 
 	}
-
 	if (WALL_HALF_DEPTH< m_pPlayer->GetPosition().z && m_pPlayer->GetPosition().z < 1000.0f - WALL_HALF_DEPTH) {
 		if (m_pPlayer->GetPosition().z > m_pWallsObject->GetPosition().z) {
 			if (m_pPlayer->m_xmf3MovingDirection.z > 0) {
@@ -208,6 +218,7 @@ void CNomalStage::CheckPlayerByWallCollision(float fElapseTime)
 			}
 		}
 	}
+	
 
 	if (m_pPlayer->GetPosition().z > 800 && !m_pBoss)
 		ResponBoss();
@@ -219,7 +230,7 @@ void CNomalStage::CheckBulletByWallCollision()
 	auto m_plBullets_itor = m_plBullets.begin();
 	for (;m_plBullets_itor != m_plBullets.end();) {
 		std::shared_ptr<CGameObject> bullet = *m_plBullets_itor;
-		if (!bullet->m_xmOOBB.Intersects(m_pWallsObject->m_xmOOBB)) {
+		if (!bullet->m_xmAABB.Intersects(m_pWallsObject->m_xmAABB)) {
 			m_plBullets_itor = m_plBullets.erase(m_plBullets_itor);
 		}
 		else ++m_plBullets_itor;
@@ -232,7 +243,7 @@ void CNomalStage::CheckEnermyByBulletCollisions()
 		auto m_plBullets_itor = m_plBullets.begin();
 		for (;m_plBullets_itor != m_plBullets.end();) {
 			std::shared_ptr<CGameObject> bullet = *m_plBullets_itor;
-			if (bullet->m_xmOOBB.Intersects(Enermy->m_xmOOBB) && !Enermy->m_bBlowingUp){
+			if (bullet->m_xmAABB.Intersects(Enermy->m_xmAABB) && !Enermy->m_bBlowingUp){
 				Enermy->m_bBlowingUp = true;
 				m_plBullets_itor = m_plBullets.erase(m_plBullets_itor);
 			}
@@ -247,7 +258,7 @@ void CNomalStage::CheckBonusObjectBulletCollisions()
 		auto m_plBullets_itor = m_plBullets.begin();
 		for (;m_plBullets_itor != m_plBullets.end();) {
 			std::shared_ptr<CGameObject> bullet = *m_plBullets_itor;
-			if (bullet->m_xmOOBB.Intersects(pBonusObject->m_xmOOBB) && !pBonusObject->m_bBlowingUp) {
+			if (bullet->m_xmAABB.Intersects(pBonusObject->m_xmAABB) && !pBonusObject->m_bBlowingUp) {
 				if(!pBonusObject->m_bBlowingUp)
 					++m_pPlayer->m_iBombNum;
 				pBonusObject->m_bBlowingUp = true;
@@ -269,7 +280,7 @@ void CNomalStage::CheckPlayerByEnermyCollisions()
 		if(pEnermy->GetPosition().z < m_pPlayer->GetPosition().z)
 			isEnermyBackPlayer = true;
 
-		if (m_pPlayer->m_xmOOBB.Intersects(pEnermy->m_xmOOBB)) {
+		if (m_pPlayer->m_xmAABB.Intersects(pEnermy->m_xmAABB)) {
 			if (!pEnermy->m_bBlowingUp) {
 				--m_pPlayer->m_iLife;
 				itor = m_plEnermys.erase(itor);
@@ -292,7 +303,7 @@ void CNomalStage::CheckPlayerByBulletCollisions()
 	{
 		std::shared_ptr<CBullet> & pBullet = *itor;
 
-		if (m_pPlayer->m_xmOOBB.Intersects(pBullet->m_xmOOBB)) {
+		if (m_pPlayer->m_xmAABB.Intersects(pBullet->m_xmAABB)) {
 			--m_pPlayer->m_iLife;
 			itor = m_plBullets.erase(itor);
 		}
@@ -320,7 +331,7 @@ XMFLOAT3 CNomalStage::GetPickRay(float xScreen, float yScreen)
 void CNomalStage::CheckBnousObjectByWallCollision()
 {
 	for (std::shared_ptr<CBonusObject> & pBonusObject : m_plBonusObjects) {
-			if (!pBonusObject->m_xmOOBB.Intersects(m_pWallsObject->m_xmOOBB)) {
+			if (!pBonusObject->m_xmAABB.Intersects(m_pWallsObject->m_xmAABB)) {
 				pBonusObject->m_xmf3MovingDirection = Vector3::Subtract(XMFLOAT3(0, 0, 0), pBonusObject->m_xmf3MovingDirection);
 			}
 	}
@@ -332,7 +343,7 @@ void CNomalStage::ResponObject(float fElapsedTime)
 		return;
 	CExplosiveObject::PrepareExplosion();
 	CCubeMesh *pObjectCubeMesh = new CCubeMesh(2.0f, 2.0f, 2.0f);
-	pObjectCubeMesh->SetOOBB(XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(2.0f, 2.0f, 2.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
+	pObjectCubeMesh->SetAABB(XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(2.0f, 2.0f, 2.0f));
 
 	std::random_device rd;
 	std::default_random_engine dre(rd());
@@ -384,7 +395,7 @@ void CNomalStage::ResponBoss()
 {
 	CExplosiveObject::PrepareExplosion();
 	CCubeMesh *pObjectCubeMesh = new CCubeMesh(8.0f, 8.0f, 8.0f);
-	pObjectCubeMesh->SetOOBB(XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(8.0f, 8.0f, 8.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
+	pObjectCubeMesh->SetAABB(XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(8.0f, 8.0f, 8.0f));
 
 	m_fBonusObjectResponTime = m_fBonusObjectInitResponTime;
 	CBoss * BossObject = new CBoss;

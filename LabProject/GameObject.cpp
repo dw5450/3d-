@@ -119,8 +119,7 @@ void CGameObject::Animate(float fElapsedTime)
 
 		if (m_pMesh)
 		{
-			m_pMesh->m_xmOOBB.Transform(m_xmOOBB, XMLoadFloat4x4(&m_xmf4x4World));
-			XMStoreFloat4(&m_xmOOBB.Orientation, XMQuaternionNormalize(XMLoadFloat4(&m_xmOOBB.Orientation)));
+			m_pMesh->m_xmAABB.Transform(m_xmAABB, XMLoadFloat4x4(&m_xmf4x4World));
 		}
 	}
 }
@@ -151,8 +150,8 @@ void CWallsObject::Animate(float fElapsedTime)
 {
 	if (m_pMesh)
 	{
-		m_pMesh->m_xmOOBB.Transform(m_xmOOBB, XMLoadFloat4x4(&m_xmf4x4World));
-		XMStoreFloat4(&m_xmOOBB.Orientation, XMQuaternionNormalize(XMLoadFloat4(&m_xmOOBB.Orientation)));
+		m_pMesh->m_xmAABB.Transform(m_xmAABB, XMLoadFloat4x4(&m_xmf4x4World));
+
 	}
 }
 
@@ -206,7 +205,7 @@ void CExplosiveObject::Animate(float fElapsedTime)
 		if (m_fElapsedTimes <= m_fDuration)
 		{
 			XMFLOAT3 xmf3Position = GetPosition();
-			for (int i = 0; i < EXPLOSION_DEBRISES; i++)
+			for (int i = 0; i < EXPLOSION_DEBRISES; i+=LOD)
 			{
 				m_pxmf4x4Transforms[i] = Matrix4x4::Identity();
 				m_pxmf4x4Transforms[i]._41 = xmf3Position.x + m_pxmf3SphereVectors[i].x * m_fExplosionSpeed * m_fElapsedTimes;
@@ -225,8 +224,8 @@ void CExplosiveObject::Animate(float fElapsedTime)
 void CExplosiveObject::Render(HDC hDCFrameBuffer, CCamera *pCamera)
 {
 	if (m_bBlowingUp)
-	{
-		for (int i = 0; i < EXPLOSION_DEBRISES; i++)
+	{	
+		for (int i = 0; i < EXPLOSION_DEBRISES; i+= LOD)
 		{
 			if (m_pExplosionMesh)
 			{

@@ -18,7 +18,7 @@ public:
 	CMesh						*m_pMesh = NULL;
     XMFLOAT4X4					m_xmf4x4World;    
 
-	BoundingOrientedBox			m_xmOOBB;
+	BoundingBox					m_xmAABB;
 	
 	CGameObject					*m_pObjectCollided = NULL;
 
@@ -97,6 +97,8 @@ public:
 	float						m_fExplosionSpeed = 10.0f;
 	float						m_fExplosionRotation = 720.0f;
 
+	
+	int LOD = 1;
 	virtual void Animate(float fElapsedTime);
 	virtual void Render(HDC hDCFrameBuffer, CCamera *pCamera);
 
