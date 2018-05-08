@@ -281,8 +281,8 @@ void CNomalStage::CheckPlayerByEnermyCollisions()
 
 	if (isEnermyBackPlayer)
 		m_pPlayer->SetColor(RGB(255, 0, 0));
-	//else
-		//m_pPlayer->SetColor(RGB(0, 0, 255));
+	else
+		m_pPlayer->SetColor(RGB(0, 0, 255));
 }
 
 void CNomalStage::CheckPlayerByBulletCollisions()
