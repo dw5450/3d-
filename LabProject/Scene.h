@@ -65,10 +65,13 @@ public:
 	void CheckPlayerByWallCollision(float fElapseTime);
 	void CheckBulletByWallCollision();
 	void CheckBnousObjectByWallCollision();
+
 	void CheckEnermyByBulletCollisions();
 	void CheckBonusObjectBulletCollisions();
-	void CheckPlayerByEnermyCollisions();
 	void CheckPlayerByBulletCollisions();
+	void CheckBossByBulletCollisions();
+
+	void CheckPlayerByEnermyCollisions();
 
 	XMFLOAT3 GetPickRay(float fMouseX, float fMouseY);
 

@@ -175,8 +175,7 @@ CBullet * CPlayer::ShotBullet()
 	pBullet->SetColor(RGB(255, 0, 0));
 	pBullet->SetMovingSpeed(BULLETSPEED);
 	pBullet->SetRotationSpeed(600.0f);
-	pBullet->SetPosition(m_xmf3Position);
-	pBullet->MoveForward(4);
+	pBullet->SetPosition(Vector3::Add(m_xmf3Position, m_xmf3Look, 7));
 	pBullet->SetMovingDirection(m_xmf3Look);
 	pBullet->SetRotationAxis(m_xmf3Look);
 	m_fBulletCooltime = m_fBulletInitCooltime;

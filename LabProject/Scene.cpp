@@ -62,7 +62,7 @@ void CNomalStage::BuildObjects()
 
 	//벽설정
 	float fHalfWidth = 45.0f, fHalfHeight = 45.0f, fHalfDepth = WALL_HALF_DEPTH;									//1.0f 당 1m
-	CWallMesh *pWallCubeMesh = new CWallMesh(fHalfWidth * 2.0f, fHalfHeight * 2.0f, fHalfDepth * 2.0f, 20);
+	CWallMesh *pWallCubeMesh = new CWallMesh(fHalfWidth * 2.0f, fHalfHeight * 2.0f, fHalfDepth * 2.0f, 10);
 	pWallCubeMesh->SetAABB(XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(fHalfWidth, fHalfHeight, fHalfDepth));
 
 	m_pWallsObject = new CWallsObject();
@@ -89,7 +89,7 @@ void CNomalStage::ReleaseObjects()
 
 void CNomalStage::Animate(float fElapsedTime)
 {
-	ResponObject(fElapsedTime);
+	//ResponObject(fElapsedTime);
 
 	if (m_pPlayer->CanShot())
 		m_plBullets.emplace_back(m_pPlayer->ShotBullet());
@@ -108,11 +108,11 @@ void CNomalStage::Animate(float fElapsedTime)
 	for (std::shared_ptr<CBullet> & data : m_plBullets)
 		data->Animate(fElapsedTime);
 
-	float LOD2 = 200;
-	float LOD3 = 400;
+	float LOD2 = 100;
+	float LOD3 = 200;
 	if (m_plEnermys.size() != 0) {
-		float LOD2 = 200 / static_cast<float>(m_plEnermys.size());
-		float LOD3 = 400 / static_cast<float>(m_plEnermys.size());
+		float LOD2 = 100 / static_cast<float>(m_plEnermys.size());
+		float LOD3 = 200 / static_cast<float>(m_plEnermys.size());
 	}
 	for (std::shared_ptr<CEnermy> & data : m_plEnermys) {
 		if (m_pPlayer->m_xmf3Look.z > 0) {
@@ -149,6 +149,7 @@ CheckEnermyByBulletCollisions();
 CheckBonusObjectBulletCollisions();
 CheckPlayerByEnermyCollisions();
 CheckPlayerByBulletCollisions();
+CheckBossByBulletCollisions();
 
 RemoveEnermy();
 RemoveBonusObject();
@@ -178,35 +179,55 @@ void CNomalStage::Render(HDC hDCFrameBuffer, CCamera * pCamera)
 
 void CNomalStage::CheckPlayerByWallCollision(float fElapseTime)
 {
-	ContainmentType containType = m_pWallsObject->m_xmAABB.Contains(m_pPlayer->m_xmAABB);					//벽으로 충돌을 체크
-	switch (containType)
-	{
-	case CONTAINS:					//포함될 경우
-		break;
+	//ContainmentType containType = m_pWallsObject->m_xmAABB.Contains(m_pPlayer->m_xmAABB);					//벽으로 충돌을 체크
+	//switch (containType)
+	//{
+	//case CONTAINS:					//포함될 경우
+	//	break;
 
-	case INTERSECTS:						//겹칠경우
-	{
-		int nPlaneIndex = -1;
-		for (int j = 0; j < 6; j++)
-		{
-			PlaneIntersectionType intersectType = m_pPlayer->m_xmAABB.Intersects(XMLoadFloat4(&m_pWallsObject->m_pxmf4WallPlanes[j]));
-			if (intersectType == INTERSECTING)
-			{
-				if (j < 4) {
-					XMVECTOR moveShift = -XMLoadFloat3(&m_pPlayer->m_xmf3MovingDirection);
-					moveShift = moveShift * fElapseTime * m_pPlayer->m_fMovingSpeed;
-					XMFLOAT3A result;
-					XMStoreFloat3(&result, moveShift);
+	//case INTERSECTS:						//겹칠경우
+	//{
+	//	int nPlaneIndex = -1;
+	//	for (int j = 0; j < 6; j++)
+	//	{
+	//		PlaneIntersectionType intersectType = m_pPlayer->m_xmAABB.Intersects(XMLoadFloat4(&m_pWallsObject->m_pxmf4WallPlanes[j]));
+	//		if (intersectType == INTERSECTING)
+	//		{
+	//			if (j < 4) {
+	//				XMVECTOR moveShift = -XMLoadFloat3(&m_pPlayer->m_xmf3MovingDirection);
+	//				moveShift = moveShift * fElapseTime * m_pPlayer->m_fMovingSpeed;
+	//				XMFLOAT3A result;
+	//				XMStoreFloat3(&result, moveShift);
 
-					m_pPlayer->Move(result, false);
-				}
-				break;
-			}
-		}
-		break;
+	//				m_pPlayer->Move(result, false);
+	//			}
+	//			break;
+	//		}
+	//	}
+	//	break;
+	//}
+	//}
+
+	if (m_pPlayer->GetPosition().x < -41.5) {
+		m_pPlayer->m_xmf3Position.x = -41.5;
 	}
 
+	if (m_pPlayer->GetPosition().x > 41.5) {
+		m_pPlayer->m_xmf3Position.x = 41.5;
+
 	}
+
+
+	if (m_pPlayer->GetPosition().y < -41.5) {
+		m_pPlayer->m_xmf3Position.y = -41.5;
+	}
+
+	if (m_pPlayer->GetPosition().y > 41.5) {
+		m_pPlayer->m_xmf3Position.y = 41.5;
+
+	}
+
+
 	if (m_pPlayer->GetPosition().z < 3) {
 		m_pPlayer->m_xmf3Position.z = 3;
 	}
@@ -340,7 +361,7 @@ void CNomalStage::CheckPlayerByEnermyCollisions()
 
 		if (m_pPlayer->m_xmAABB.Intersects(pEnermy->m_xmAABB)) {
 			if (!pEnermy->m_bBlowingUp) {
-				--m_pPlayer->m_iLife;
+				pEnermy->m_bBlowingUp = true;
 				itor = m_plEnermys.erase(itor);
 			}
 			else ++itor;
@@ -366,6 +387,23 @@ void CNomalStage::CheckPlayerByBulletCollisions()
 			itor = m_plBullets.erase(itor);
 		}
 		else ++itor;
+	}
+}
+
+void CNomalStage::CheckBossByBulletCollisions()
+{
+	if (m_pBoss) {
+		auto itor = m_plBullets.begin();
+		for (;itor != m_plBullets.end();)
+		{
+			std::shared_ptr<CBullet> & pBullet = *itor;
+
+			if (m_pBoss->m_xmAABB.Intersects(pBullet->m_xmAABB)) {
+				m_pBoss->m_bBlowingUp = true;
+				itor = m_plBullets.erase(itor);
+			}
+			else ++itor;
+		}
 	}
 }
 
@@ -477,7 +515,6 @@ void CNomalStage::ResponBoss()
 	CCubeMesh *pObjectCubeMesh = new CCubeMesh(8.0f, 8.0f, 8.0f);
 	pObjectCubeMesh->SetAABB(XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(8.0f, 8.0f, 8.0f));
 
-	m_fBonusObjectResponTime = m_fBonusObjectInitResponTime;
 	CBoss * BossObject = new CBoss;
 	BossObject->m_bActive = true;
 	BossObject->SetMesh(pObjectCubeMesh);

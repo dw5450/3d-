@@ -132,6 +132,8 @@ public:
 	virtual void Animate(float fElapseTime);
 
 public:
+
+	size_t m_iLife = 10;
 	
 	float m_fBulletCooltime = 0.5f;
 	float m_fBulletInitCooltime = 0.5f;
@@ -139,6 +141,7 @@ public:
 	bool m_bShotBullet = false;
 	bool CanShot();
 	CBullet * ShotBullet();
+
 };
 
 

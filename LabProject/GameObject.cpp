@@ -281,8 +281,11 @@ void CEnermy::TraceObject(CGameObject * pObejct)
 
 void CBoss::Animate(float fElapseTime)
 {
-	CGameObject::Animate(fElapseTime);
+	CExplosiveObject::Animate(fElapseTime);
 	m_fBulletCooltime -= fElapseTime;
+
+	if (m_iLife == 0)
+		m_bBlowingUp = true;
 
 }
 
@@ -305,9 +308,9 @@ CBullet * CBoss::ShotBullet()
 	pBullet->SetColor(RGB(255, 0, 0));
 	pBullet->SetMovingSpeed(60);
 	pBullet->SetRotationSpeed(600.0f);
-	pBullet->SetPosition(GetPosition());
+	pBullet->SetPosition(Vector3::Add(GetPosition(), m_xmf3MovingDirection, 10));
 	pBullet->SetMovingDirection(m_xmf3MovingDirection);
-	pBullet->MoveForward(4);
 	pBullet->SetRotationAxis(m_xmf3MovingDirection);
 	return pBullet;
+
 }
