@@ -186,12 +186,8 @@ CBullet * CPlayer::ShotBullet()
 void CPlayer::ReloadBullet(float fElapseTime)
 {
 	if (m_bReload) {
-		m_bReloadTime -= fElapseTime;
-		if (m_bReloadTime < 0) {
-			m_bReload = false;
-			m_iBulletNum = m_iBulletMaxNum;
-			m_bReloadTime = m_bReloadInitTime;
-		}
+		m_bReload = false;
+		m_iBulletNum = m_iBulletMaxNum;
 	}
 }
 

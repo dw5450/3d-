@@ -31,7 +31,7 @@ public:
 	CMesh(int nPolygons);
 	virtual ~CMesh();
 
-private:
+public:
 	int							m_nReferences;
 
 	int							m_nPolygons;
@@ -64,6 +64,9 @@ class CWallMesh : public CMesh
 public:
 	CWallMesh(float fWidth = 4.0f, float fHeight = 4.0f, float fDepth = 4.0f, int nSubRects = 20);
 	virtual ~CWallMesh();
+	virtual void Render(HDC hDCFrameBuffer, XMFLOAT4X4& xmf4x4World, CCamera *pCamera);
+
+
 };
 
 class CAirplaneMesh : public CMesh

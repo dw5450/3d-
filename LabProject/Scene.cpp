@@ -107,11 +107,12 @@ void CNomalStage::Animate(float fElapsedTime)
 
 	for (std::shared_ptr<CBullet> & data : m_plBullets)
 		data->Animate(fElapsedTime);
+
 	float LOD2 = 200;
 	float LOD3 = 400;
 	if (m_plEnermys.size() != 0) {
-		float LOD2 = 200 / m_plEnermys.size();
-		float LOD3 = 400 / m_plEnermys.size();
+		float LOD2 = 200 / static_cast<float>(m_plEnermys.size());
+		float LOD3 = 400 / static_cast<float>(m_plEnermys.size());
 	}
 	for (std::shared_ptr<CEnermy> & data : m_plEnermys) {
 		if (m_pPlayer->m_xmf3Look.z > 0) {
@@ -132,10 +133,13 @@ void CNomalStage::Animate(float fElapsedTime)
 for (std::shared_ptr<CBonusObject> & data : m_plBonusObjects)
 data->Animate(fElapsedTime);
 
-if (m_pPlayer->ShotBomb()) {
-	for (std::shared_ptr<CEnermy> & data : m_plEnermys) {
-		data->m_bBlowingUp = true;
-	}
+if (m_pPlayer->ShotBomb() && !bBomb) {
+	bBomb = true;
+	xmf3BombPosition = Vector3::Add(m_pPlayer->GetPosition(), m_pPlayer->m_xmf3Look, 32.5f);
+}
+
+if (bBomb) {
+	BlowUpEnermy(fElapsedTime);
 }
 
 CheckPlayerByWallCollision(fElapsedTime);
@@ -212,31 +216,71 @@ void CNomalStage::CheckPlayerByWallCollision(float fElapseTime)
 
 	}
 
-
-	if (WALL_HALF_DEPTH< m_pPlayer->GetPosition().z && m_pPlayer->GetPosition().z < 1000.0f - WALL_HALF_DEPTH) {
-		if (m_pPlayer->GetPosition().z > m_pWallsObject->GetPosition().z) {
-			if (m_pPlayer->m_xmf3MovingDirection.z > 0) {
-				m_pWallsObject->SetPosition(XMFLOAT3(0, 0, m_pWallsObject->GetPosition().z + 25));
-			}
-		}
-		else if (m_pPlayer->GetPosition().z < m_pWallsObject->GetPosition().z) {
-			if (m_pPlayer->m_xmf3MovingDirection.z < 0) {
-				m_pWallsObject->SetPosition(XMFLOAT3(0, 0, m_pWallsObject->GetPosition().z - 25));
-			}
-		}
-	}
-
-	if (m_pPlayer->GetPosition().z < 1000.0f - WALL_HALF_DEPTH) {
-		if (m_pPlayer->GetPosition().z > m_pWallsObject->GetPosition().z) {
-			if (m_pPlayer->m_xmf3MovingDirection.z > 0) {
-				m_pWallsObject->SetPosition(XMFLOAT3(0, 0, m_pWallsObject->GetPosition().z + 25));
-			}
-		}
-	}
-	
 	if (m_pPlayer->GetPosition().z > 800 && !m_pBoss)
 		ResponBoss();
 
+
+	if (m_pPlayer->m_xmf3Look.z > 0) {				//플레이어가 앞을 바라 볼 경우
+
+		if(m_pPlayer->m_xmf3Position.z > 750)
+			m_pWallsObject->SetPosition(0, 0, 850.0f);
+
+		if (m_pPlayer->m_xmf3MovingDirection.z > 0) { //앞으로 갈 경우
+			if (m_pPlayer->m_xmf3Position.z > m_pWallsObject->GetPosition().z - 100) {
+				m_pWallsObject->MoveForward(25.0f);
+			}
+		}
+		else   // 뒤로 갈경우
+		{
+			if (m_pPlayer->m_xmf3Position.z < m_pWallsObject->GetPosition().z - 125) {
+				m_pWallsObject->MoveForward(-25.0f);
+			}
+		}
+
+	}
+	else                                            //플레이어가 뒤를 바라 볼 경우
+	{
+
+		if (m_pPlayer->m_xmf3Position.z < 250)
+			m_pWallsObject->SetPosition(0, 0, 150.0f);
+
+		if (m_pPlayer->m_xmf3MovingDirection.z > 0) { //앞으로 갈 경우
+			if (m_pPlayer->m_xmf3Position.z > m_pWallsObject->GetPosition().z + 100) {
+				m_pWallsObject->MoveForward(25.0f);
+			}
+		}
+		else   // 뒤로 갈경우
+		{
+			if (m_pPlayer->m_xmf3Position.z < m_pWallsObject->GetPosition().z + 125) {
+				m_pWallsObject->MoveForward(-25.0f);
+			}
+		}
+	}
+
+
+
+
+
+	//if (WALL_HALF_DEPTH< m_pPlayer->GetPosition().z && m_pPlayer->GetPosition().z < 1000.0f - WALL_HALF_DEPTH) {
+	//	if (m_pPlayer->GetPosition().z > m_pWallsObject->GetPosition().z) {
+	//		if (m_pPlayer->m_xmf3MovingDirection.z > 0) {
+	//			m_pWallsObject->SetPosition(XMFLOAT3(0, 0, m_pWallsObject->GetPosition().z + 25));
+	//		}
+	//	}
+	//	else if (m_pPlayer->GetPosition().z < m_pWallsObject->GetPosition().z) {
+	//		if (m_pPlayer->m_xmf3MovingDirection.z < 0) {
+	//			m_pWallsObject->SetPosition(XMFLOAT3(0, 0, m_pWallsObject->GetPosition().z - 25));
+	//		}
+	//	}
+	//}
+
+	//if (m_pPlayer->GetPosition().z < 1000.0f - WALL_HALF_DEPTH) {
+	//	if (m_pPlayer->GetPosition().z > m_pWallsObject->GetPosition().z) {
+	//		if (m_pPlayer->m_xmf3MovingDirection.z > 0) {
+	//			m_pWallsObject->SetPosition(XMFLOAT3(0, 0, m_pWallsObject->GetPosition().z + 25));
+	//		}
+	//	}
+	//}
 }
 
 void CNomalStage::CheckBulletByWallCollision()
@@ -340,6 +384,28 @@ XMFLOAT3 CNomalStage::GetPickRay(float xScreen, float yScreen)
 	MouseFarPosition = Vector3::TransformCoord(MouseFarPosition, InvProj);
 	MouseFarPosition.z = 1.0f;
 	return Vector3::Normalize( MouseFarPosition);
+}
+
+void CNomalStage::BlowUpEnermy(float fElapseTime)
+{
+	fBombElapseTime += fElapseTime;
+	 
+	float distance = fBombElapseTime * fBombSpeed;
+
+	if (distance > 250.0f) {
+		fBombElapseTime = 0;
+		bBomb = false;
+		return;
+	}
+
+	XMFLOAT3 extents(distance, distance, distance);
+
+	BoundingBox bb(xmf3BombPosition, extents);
+	for (std::shared_ptr<CEnermy> & data : m_plEnermys) {
+		ContainmentType containType = data->m_xmAABB.Contains(bb);					//벽으로 충돌을 체크
+		if (containType == INTERSECTING)
+			data->m_bBlowingUp = true;
+	}
 }
 
 void CNomalStage::CheckBnousObjectByWallCollision()

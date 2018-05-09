@@ -56,29 +56,41 @@ void CMesh::SetPolygon(int nIndex, CPolygon *pPolygon)
 
 void CMesh::Render(HDC hDCFrameBuffer, XMFLOAT4X4& xmf4x4World, CCamera *pCamera)
 {
+
 	XMFLOAT4X4 xmf4x4Transform = Matrix4x4::Multiply(xmf4x4World, pCamera->m_xmf4x4ViewProject);
 	for (int j = 0; j < m_nPolygons; j++)
 	{
 		int nVertices = m_ppPolygons[j]->m_nVertices;
 		CVertex *pVertices = m_ppPolygons[j]->m_pVertices;
-		XMFLOAT3 xmf3Previous(-1.0f, 0.0f, 0.0f);
-		for (int i = 0; i <= nVertices; i++)
-		{
-			CVertex vertex = pVertices[i % nVertices];
-			//World/View/Projection Transformation(Perspective Divide)
-			XMFLOAT3 xmf3Current = Vector3::TransformCoord(vertex.m_xmf3Position, xmf4x4Transform);
-			if ((xmf3Current.z >= 0.0f) && (xmf3Current.z <= 1.0f))
-			{
-				//Screen Transformation
-				xmf3Current.x = +xmf3Current.x * (pCamera->m_Viewport.m_nWidth * 0.5f) + pCamera->m_Viewport.m_xStart + (pCamera->m_Viewport.m_nWidth * 0.5f);
-				xmf3Current.y = -xmf3Current.y * (pCamera->m_Viewport.m_nHeight * 0.5f) + pCamera->m_Viewport.m_yStart + (pCamera->m_Viewport.m_nHeight * 0.5f);
 
-				if (xmf3Previous.x >= 0.0f)
+		XMFLOAT3 p1 = Vector3::TransformCoord(pVertices[0].m_xmf3Position, xmf4x4Transform);
+		XMFLOAT3 p2 = Vector3::TransformCoord(pVertices[1].m_xmf3Position, xmf4x4Transform);
+		XMFLOAT3 p3 = Vector3::TransformCoord(pVertices[2].m_xmf3Position, xmf4x4Transform);
+		
+		XMFLOAT3 dir1 = Vector3::Subtract(p2, p1);
+		XMFLOAT3 dir2 = Vector3::Subtract(p3, p2);
+
+		if (Vector3::CrossProduct(dir1, dir2).z < 0)
+		{
+			XMFLOAT3 xmf3Previous(-1.0f, 0.0f, 0.0f);
+			for (int i = 0; i <= nVertices; i++)
+			{
+				CVertex vertex = pVertices[i % nVertices];
+				//World/View/Projection Transformation(Perspective Divide)
+				XMFLOAT3 xmf3Current = Vector3::TransformCoord(vertex.m_xmf3Position, xmf4x4Transform);
+				if ((xmf3Current.z >= 0.0f) && (xmf3Current.z <= 1.0f))			//일단 절두체 컬링
 				{
-					::MoveToEx(hDCFrameBuffer, (long)xmf3Previous.x, (long)xmf3Previous.y, NULL);
-					::LineTo(hDCFrameBuffer, (long)xmf3Current.x, (long)xmf3Current.y);
+					//Screen Transformation
+					xmf3Current.x = +xmf3Current.x * (pCamera->m_Viewport.m_nWidth * 0.5f) + pCamera->m_Viewport.m_xStart + (pCamera->m_Viewport.m_nWidth * 0.5f);
+					xmf3Current.y = -xmf3Current.y * (pCamera->m_Viewport.m_nHeight * 0.5f) + pCamera->m_Viewport.m_yStart + (pCamera->m_Viewport.m_nHeight * 0.5f);
+
+					if (xmf3Previous.x >= 0.0f)
+					{
+						::MoveToEx(hDCFrameBuffer, (long)xmf3Previous.x, (long)xmf3Previous.y, NULL);
+						::LineTo(hDCFrameBuffer, (long)xmf3Current.x, (long)xmf3Current.y);
+					}
+					xmf3Previous = xmf3Current;
 				}
-				xmf3Previous = xmf3Current;
 			}
 		}
 	}
@@ -224,6 +236,37 @@ CWallMesh::CWallMesh(float fWidth, float fHeight, float fDepth, int nSubRects) :
 
 CWallMesh::~CWallMesh(void)
 {
+}
+
+void CWallMesh::Render(HDC hDCFrameBuffer, XMFLOAT4X4 & xmf4x4World, CCamera * pCamera)
+{
+	XMFLOAT4X4 xmf4x4Transform = Matrix4x4::Multiply(xmf4x4World, pCamera->m_xmf4x4ViewProject);
+	for (int j = 0; j < m_nPolygons; j++)
+	{
+		int nVertices = m_ppPolygons[j]->m_nVertices;
+		CVertex *pVertices = m_ppPolygons[j]->m_pVertices;
+
+		XMFLOAT3 xmf3Previous(-1.0f, 0.0f, 0.0f);
+		for (int i = 0; i <= nVertices; i++)
+		{
+			CVertex vertex = pVertices[i % nVertices];
+				//World/View/Projection Transformation(Perspective Divide)
+			XMFLOAT3 xmf3Current = Vector3::TransformCoord(vertex.m_xmf3Position, xmf4x4Transform);
+			if ((xmf3Current.z >= 0.0f) && (xmf3Current.z <= 1.0f))			//일단 절두체 컬링
+			{
+					//Screen Transformation
+				xmf3Current.x = +xmf3Current.x * (pCamera->m_Viewport.m_nWidth * 0.5f) + pCamera->m_Viewport.m_xStart + (pCamera->m_Viewport.m_nWidth * 0.5f);
+				xmf3Current.y = -xmf3Current.y * (pCamera->m_Viewport.m_nHeight * 0.5f) + pCamera->m_Viewport.m_yStart + (pCamera->m_Viewport.m_nHeight * 0.5f);
+
+				if (xmf3Previous.x >= 0.0f)
+				{
+					::MoveToEx(hDCFrameBuffer, (long)xmf3Previous.x, (long)xmf3Previous.y, NULL);
+					::LineTo(hDCFrameBuffer, (long)xmf3Current.x, (long)xmf3Current.y);
+				}
+				xmf3Previous = xmf3Current;
+			}
+		}
+	}
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////

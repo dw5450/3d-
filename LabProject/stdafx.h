@@ -83,7 +83,7 @@ using namespace DirectX::PackedVector;
 
 
 #define WALL_HALF_SIZE				45.0f
-#define WALL_HALF_DEPTH				250.0f
+#define WALL_HALF_DEPTH				125.0f
 
 
 namespace Vector3

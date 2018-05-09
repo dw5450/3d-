@@ -72,12 +72,16 @@ public:
 
 	XMFLOAT3 GetPickRay(float fMouseX, float fMouseY);
 
+
+	float bBomb = false;
+	float fBombElapseTime		=      0;
+	float fBombSpeed = WALL_HALF_DEPTH;
+	XMFLOAT3 xmf3BombPosition;
+	void BlowUpEnermy(float fElapseTime);
+
 	void ResponObject(float fElapsedTime);
 	void ResponBoss();
-	void ShotBullet(CGameObject * pObject, float & fBulletCoolTime,const float fBulletMaxCoolTime);
-
-
-
+	
 	void RemoveEnermy();
 	void RemoveBonusObject();
 	void RemoveBullet();
