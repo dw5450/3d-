@@ -24,12 +24,12 @@ public:
 	XMFLOAT3					m_xmf3Look;
 
 	XMFLOAT4X4					m_xmf4x4View;
-	XMFLOAT4X4					m_xmf4x4Projection;
-	XMFLOAT4X4					m_xmf4x4ViewProject;
+	XMFLOAT4X4					m_xmf4x4Projection;				//투영 변환을 위한 행렬
+	XMFLOAT4X4					m_xmf4x4ViewProject;				//화면 변환을 위한 행렬
 
 	VIEWPORT					m_Viewport;
 
-	void GenerateViewMatrix();
+	void GenerateViewMatrix();								
 	void GenerateProjectionMatrix(float fNearPlaneDistance, float fFarPlaneDistance, float fFOVAngle);
 	void SetViewport(int xStart, int yStart, int nWidth, int nHeight);
 

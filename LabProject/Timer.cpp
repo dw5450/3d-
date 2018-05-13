@@ -123,3 +123,7 @@ void CGameTimer::Stop()
 		m_bStopped = true;
 	}
 }
+
+
+
+//시간들을 가져오는 함수들

@@ -30,8 +30,8 @@ public:
 	void Move(float x, float y, float z);
 	void Rotate(float fPitch = 0.0f, float fYaw = 0.0f, float fRoll = 0.0f);
 	void SetCameraOffset(XMFLOAT3& xmf3CameraOffset);
-	
-	void Update(float fTimeElapsed=0.016f);
+
+	void Update(float fTimeElapsed = 0.016f);
 
 	virtual void Animate(float fElapsedTime);
 	virtual void Render(HDC hDCFrameBuffer, CCamera *pCamera);
@@ -45,8 +45,8 @@ public:		//skill
 	unsigned int			m_iBulletNum = MAXBULLETNUM;
 	bool CanShot();
 	CBullet * ShotBullet();
-	
-	bool					m_bReload	= false;
+
+	bool					m_bReload = false;
 	float					m_bReloadTime = RELOADTIME;
 	float					m_bReloadInitTime = RELOADTIME;
 	void ReloadBullet(float fElapseTime);
@@ -54,17 +54,18 @@ public:		//skill
 
 	float					m_fBombCooltime = 1.0f;
 	float					m_fBombInitCooltime = 1.0f;
-	int m_iBombNum = 3;
+	unsigned int m_iBombNum = 0;
 	bool m_bShotBomb = false;
 	bool ShotBomb();
 
 	bool m_bTraceEnermy = false;
-	std::shared_ptr<CGameObject> m_pTracingObject;
+	float m_fBombDistance = 30;
+	std::shared_ptr<CEnermy> m_pTracingEnermy;
 	XMFLOAT3 m_xmf3PickRay = XMFLOAT3(0, 0, 0);
 	void PickingEnermy(const std::list<std::shared_ptr<CEnermy>> &);
 	void TracingEnermy();
 
-	unsigned int m_iLife = 10;
+	unsigned int m_iLife = 1;
 
 
 };

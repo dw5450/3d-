@@ -82,7 +82,7 @@ using namespace DirectX::PackedVector;
 #define BONUSOBJECTSPEED			30.0f
 
 
-#define WALL_HALF_SIZE				45.0f
+#define WALL_HALF_SIZE				50.0f
 #define WALL_HALF_DEPTH				125.0f
 
 

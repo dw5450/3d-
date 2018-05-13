@@ -148,8 +148,8 @@ void CGameFramework::BuildObjects()
 	m_pPlayer->SetCameraOffset(XMFLOAT3(0.0f, 5.0f, -15.0f));
 	m_pPlayer->SetMovingDirection(XMFLOAT3(0.0f, 0.0f, 0.0f));
 	m_pPlayer->SetMovingSpeed(PLAYER_SPEED);
-	
-	m_pScene = new CNomalStage();
+
+	m_pScene = new CScene();
 	m_pScene->m_pPlayer = m_pPlayer;
 	m_pScene->BuildObjects();
 }
@@ -185,10 +185,15 @@ void CGameFramework::ProcessInput()
 		if (pKeyBuffer['S'] & 0xF0) dwDirection |= DIR_BACKWARD;
 		if (pKeyBuffer['A'] & 0xF0) dwDirection |= DIR_LEFT;
 		if (pKeyBuffer['D'] & 0xF0) dwDirection |= DIR_RIGHT;
+		if (pKeyBuffer['Q'] & 0xF0) dwDirection |= DIR_UP;
+		if (pKeyBuffer['E'] & 0xF0) dwDirection |= DIR_DOWN;
 		if (pKeyBuffer[VK_CONTROL] & 0xF0) m_pPlayer->m_bShotBullet = true;
 		if (pKeyBuffer['R'] & 0xF0) m_pPlayer->m_bReload = true;
-		if (pKeyBuffer['Q'] & 0xF0) m_pPlayer->m_bShotBomb = true;
-	
+		if (pKeyBuffer['Z'] & 0xF0) m_pPlayer->m_bShotBomb = true;	
+		if (pKeyBuffer['L'] & 0xF0) m_pPlayer->m_iLife = 20;
+		if (pKeyBuffer['O'] & 0xF0) m_pPlayer->m_iBombNum = 20;
+		if (pKeyBuffer['P'] & 0xF0) m_pPlayer->m_fBombDistance = 250;
+
 	}
 	float cxDelta = 0.0f, cyDelta = 0.0f;
 	POINT ptCursorPos;
@@ -203,9 +208,8 @@ void CGameFramework::ProcessInput()
 	}
 
 	if (pKeyBuffer[VK_LBUTTON] & 0xF0) {
-		CNomalStage * nc = (CNomalStage *)m_pScene;
-		m_pPlayer->m_xmf3PickRay = nc->GetPickRay(ptCursorPos.x, ptCursorPos.y);
-		m_pPlayer->PickingEnermy(nc->m_plEnermys);
+		m_pPlayer->m_xmf3PickRay = m_pScene->GetPickRay(ptCursorPos.x, ptCursorPos.y);
+		m_pPlayer->PickingEnermy(m_pScene->m_plEnermys);
 	}
 	if ((dwDirection != 0) || (cxDelta != 0.0f) || (cyDelta != 0.0f))
 	{
@@ -217,11 +221,11 @@ void CGameFramework::ProcessInput()
 
 			}
 			//else 
-				//m_pPlayer->Rotate(cyDelta, cxDelta, 0.0f);
+			//m_pPlayer->Rotate(cyDelta, cxDelta, 0.0f);
 		}
-		if (dwDirection){
+		if (dwDirection) {
 			m_pPlayer->Move(dwDirection, m_GameTimer.GetTimeElapsed());
-			}//속도가 디폴드 설정 되어 있음
+		}//속도가 디폴드 설정 되어 있음
 	}
 	m_pPlayer->Update(m_GameTimer.GetTimeElapsed());
 }
@@ -230,11 +234,11 @@ void CGameFramework::FrameAdvance()
 {
 	if (!m_bActive) return;					//만약 엑티브 상태가 아닐시 프로그램을 실행하지 않습니다.
 
-	m_GameTimer.Tick(00.0f);					//게임의 시간
+	m_GameTimer.Tick(60.0f);					//게임의 시간
 
 	ProcessInput();							//키보드나 마우스의 입력을 받습니다.
 
-	//오브젝트들의 좌표를 이동시킵니다.
+											//오브젝트들의 좌표를 이동시킵니다.
 	m_pScene->Animate(m_GameTimer.GetTimeElapsed());
 
 
@@ -249,9 +253,18 @@ void CGameFramework::FrameAdvance()
 	m_GameTimer.GetFrameRate(m_pszFrameRate + 12, 37);				//프레임 레이트를 설정합니다.
 	::SetWindowText(m_hWnd, m_pszFrameRate);		//프레임 레이트를 보여줍니다.
 
-	if(m_pPlayer->m_iLife <=0){
-		DestroyWindow(m_hWnd);
-		::PostQuitMessage(0);
+	if (m_pPlayer->m_iLife <= 0) {
+		MessageBox(m_hWnd, _T("처음부터 다시 시작합니다."), _T(""), NULL);
+		//ReleaseObjects();
+		BuildObjects();
+	}
+
+	if (m_pScene->m_pBoss) {
+		if (!m_pScene->m_pBoss->m_bActive) {
+			MessageBox(m_hWnd, _T("Clear"), _T(""), NULL);
+			DestroyWindow(m_hWnd);
+			::PostQuitMessage(0);
+		}
 	}
 }
 

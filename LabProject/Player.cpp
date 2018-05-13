@@ -4,7 +4,7 @@
 CPlayer::CPlayer()
 {
 	m_pCamera = new CCamera();
-	m_pCamera->GenerateProjectionMatrix(1.01f, 1000.0f, 45.0f);
+	m_pCamera->GenerateProjectionMatrix(1.01f, 1000.0f, 60.0f);
 	m_pCamera->SetViewport(0, 0, CLIENT_WIDTH, CLIENT_HEIGHT);
 
 
@@ -46,14 +46,17 @@ void CPlayer::Move(DWORD dwDirection, float elapse_time)
 	float fDistance = m_fMovingSpeed * elapse_time;
 	if (dwDirection)
 	{
-		if (dwDirection & DIR_FORWARD) ++orderCnt;
+		/*if (dwDirection & DIR_FORWARD) ++orderCnt;
 		if (dwDirection & DIR_BACKWARD)  ++orderCnt;
 		if (dwDirection & DIR_RIGHT)  ++orderCnt;
 		if (dwDirection & DIR_LEFT)  ++orderCnt;
+		if (dwDirection & DIR_UP) ++orderCnt;
+		if (dwDirection & DIR_DOWN) ++orderCnt;
+*/
 
 
 		XMFLOAT3 xmf3Shift = XMFLOAT3(0, 0, 0);
-		fDistance = fDistance / orderCnt;
+		//fDistance = fDistance / orderCnt;
 		if (dwDirection & DIR_FORWARD) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Look, fDistance);
 		if (dwDirection & DIR_BACKWARD) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Look, -fDistance);
 		if (dwDirection & DIR_RIGHT) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Right, fDistance);
@@ -73,7 +76,7 @@ void CPlayer::Move(XMFLOAT3& xmf3Shift, bool bUpdateVelocity)
 	{
 		m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, xmf3Shift);
 	}
-	else 
+	else
 	{
 		m_xmf3Position = Vector3::Add(xmf3Shift, m_xmf3Position);
 		CGameObject::SetPosition(m_xmf3Position);
@@ -151,7 +154,7 @@ void CPlayer::Render(HDC hDCFrameBuffer, CCamera *pCamera)
 	m_xmf4x4World._41 = m_xmf3Position.x; m_xmf4x4World._42 = m_xmf3Position.y; m_xmf4x4World._43 = m_xmf3Position.z;
 
 	m_xmf4x4World = Matrix4x4::Multiply(XMMatrixRotationRollPitchYaw(XMConvertToRadians(90.0f), 0.0f, 0.0f), m_xmf4x4World);
-	
+
 	CGameObject::Render(hDCFrameBuffer, pCamera);
 }
 
@@ -221,9 +224,9 @@ void CPlayer::PickingEnermy(const std::list<std::shared_ptr<CEnermy>>& plEnermy)
 
 	float distance = 10000.0f;
 	float nearPickedZ = 10000.f;
-	for (const std::shared_ptr<CEnermy> & data : plEnermy) 
+	for (const std::shared_ptr<CEnermy> & data : plEnermy)
 		if (data->m_xmAABB.Intersects(vecPosition, vecPickingRay, distance) && data->GetPosition().z <nearPickedZ) {
-			m_pTracingObject = data;
+			m_pTracingEnermy = data;
 			m_bTraceEnermy = true;
 		}
 
@@ -232,8 +235,8 @@ void CPlayer::PickingEnermy(const std::list<std::shared_ptr<CEnermy>>& plEnermy)
 void CPlayer::TracingEnermy()
 {
 	static int num = 0;
-	if (m_bTraceEnermy) {
-		XMFLOAT3 EndLook = Vector3::Normalize(Vector3::Subtract(m_pTracingObject->GetPosition(), m_xmf3Position));
+	if (m_bTraceEnermy && m_bShotBullet && !m_pTracingEnermy->m_bBlowingUp) {
+		XMFLOAT3 EndLook = Vector3::Normalize(Vector3::Subtract(m_pTracingEnermy->GetPosition(), m_xmf3Position));
 		XMFLOAT3 RotationDirection = Vector3::Normalize(Vector3::Subtract(EndLook, m_xmf3Look));
 		XMFLOAT3 RotaitionAdd;
 		RotaitionAdd = Vector3::ScalarProduct(RotationDirection, 0.01f);
@@ -241,14 +244,14 @@ void CPlayer::TracingEnermy()
 		if (EndLook.x > m_xmf3Look.x && m_xmf3Look.x + RotaitionAdd.x > EndLook.x) {
 			m_xmf3Look = EndLook;
 		}
-		else if(EndLook.x < m_xmf3Look.x && m_xmf3Look.x + RotaitionAdd.x < EndLook.x) {
+		else if (EndLook.x < m_xmf3Look.x && m_xmf3Look.x + RotaitionAdd.x < EndLook.x) {
 			m_xmf3Look = EndLook;
 		}
 
 		else m_xmf3Look = Vector3::Add(m_xmf3Look, RotaitionAdd);
 		m_xmf3Right = Vector3::CrossProduct(m_xmf3Look, XMFLOAT3(0, -1, 0));
 		m_xmf3Up = Vector3::CrossProduct(m_xmf3Look, m_xmf3Right);
-	
+
 
 	}
 }

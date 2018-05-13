@@ -66,7 +66,7 @@ void CMesh::Render(HDC hDCFrameBuffer, XMFLOAT4X4& xmf4x4World, CCamera *pCamera
 		XMFLOAT3 p1 = Vector3::TransformCoord(pVertices[0].m_xmf3Position, xmf4x4Transform);
 		XMFLOAT3 p2 = Vector3::TransformCoord(pVertices[1].m_xmf3Position, xmf4x4Transform);
 		XMFLOAT3 p3 = Vector3::TransformCoord(pVertices[2].m_xmf3Position, xmf4x4Transform);
-		
+
 		XMFLOAT3 dir1 = Vector3::Subtract(p2, p1);
 		XMFLOAT3 dir2 = Vector3::Subtract(p3, p2);
 
@@ -96,8 +96,11 @@ void CMesh::Render(HDC hDCFrameBuffer, XMFLOAT4X4& xmf4x4World, CCamera *pCamera
 	}
 }
 
+
+
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////
-//
+
 CCubeMesh::CCubeMesh(float fWidth, float fHeight, float fDepth) : CMesh(6)
 {
 	float fHalfWidth = fWidth * 0.5f;
@@ -151,9 +154,11 @@ CCubeMesh::~CCubeMesh(void)
 {
 }
 
+
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////
-//
-CWallMesh::CWallMesh(float fWidth, float fHeight, float fDepth, int nSubRects) : CMesh((4 * nSubRects * nSubRects)+2)
+
+CWallMesh::CWallMesh(float fWidth, float fHeight, float fDepth, int nSubRects) : CMesh((4 * nSubRects * nSubRects) + 2)
 {
 	float fHalfWidth = fWidth * 0.5f;
 	float fHalfHeight = fHeight * 0.5f;
@@ -169,10 +174,10 @@ CWallMesh::CWallMesh(float fWidth, float fHeight, float fDepth, int nSubRects) :
 		for (int j = 0; j < nSubRects; j++)
 		{
 			pLeftFace = new CPolygon(4);
-			pLeftFace->SetVertex(0, CVertex(-fHalfWidth, -fHalfHeight+(i*fCellHeight), -fHalfDepth+(j*fCellDepth)));
-			pLeftFace->SetVertex(1, CVertex(-fHalfWidth, -fHalfHeight+((i+1)*fCellHeight), -fHalfDepth+(j*fCellDepth)));
-			pLeftFace->SetVertex(2, CVertex(-fHalfWidth, -fHalfHeight+((i+1)*fCellHeight), -fHalfDepth+((j+1)*fCellDepth)));
-			pLeftFace->SetVertex(3, CVertex(-fHalfWidth, -fHalfHeight+(i*fCellHeight), -fHalfDepth+((j+1)*fCellDepth)));
+			pLeftFace->SetVertex(0, CVertex(-fHalfWidth, -fHalfHeight + (i*fCellHeight), -fHalfDepth + (j*fCellDepth)));
+			pLeftFace->SetVertex(1, CVertex(-fHalfWidth, -fHalfHeight + ((i + 1)*fCellHeight), -fHalfDepth + (j*fCellDepth)));
+			pLeftFace->SetVertex(2, CVertex(-fHalfWidth, -fHalfHeight + ((i + 1)*fCellHeight), -fHalfDepth + ((j + 1)*fCellDepth)));
+			pLeftFace->SetVertex(3, CVertex(-fHalfWidth, -fHalfHeight + (i*fCellHeight), -fHalfDepth + ((j + 1)*fCellDepth)));
 			SetPolygon(k++, pLeftFace);
 		}
 	}
@@ -238,6 +243,7 @@ CWallMesh::~CWallMesh(void)
 {
 }
 
+
 void CWallMesh::Render(HDC hDCFrameBuffer, XMFLOAT4X4 & xmf4x4World, CCamera * pCamera)
 {
 	XMFLOAT4X4 xmf4x4Transform = Matrix4x4::Multiply(xmf4x4World, pCamera->m_xmf4x4ViewProject);
@@ -250,11 +256,11 @@ void CWallMesh::Render(HDC hDCFrameBuffer, XMFLOAT4X4 & xmf4x4World, CCamera * p
 		for (int i = 0; i <= nVertices; i++)
 		{
 			CVertex vertex = pVertices[i % nVertices];
-				//World/View/Projection Transformation(Perspective Divide)
+			//World/View/Projection Transformation(Perspective Divide)
 			XMFLOAT3 xmf3Current = Vector3::TransformCoord(vertex.m_xmf3Position, xmf4x4Transform);
 			if ((xmf3Current.z >= 0.0f) && (xmf3Current.z <= 1.0f))			//일단 절두체 컬링
 			{
-					//Screen Transformation
+				//Screen Transformation
 				xmf3Current.x = +xmf3Current.x * (pCamera->m_Viewport.m_nWidth * 0.5f) + pCamera->m_Viewport.m_xStart + (pCamera->m_Viewport.m_nWidth * 0.5f);
 				xmf3Current.y = -xmf3Current.y * (pCamera->m_Viewport.m_nHeight * 0.5f) + pCamera->m_Viewport.m_yStart + (pCamera->m_Viewport.m_nHeight * 0.5f);
 
@@ -269,11 +275,12 @@ void CWallMesh::Render(HDC hDCFrameBuffer, XMFLOAT4X4 & xmf4x4World, CCamera * p
 	}
 }
 
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 CAirplaneMesh::CAirplaneMesh(float fWidth, float fHeight, float fDepth) : CMesh(24)
 {
-	float fx = fWidth*0.5f, fy = fHeight*0.5f, fz = fDepth*0.5f;
+	float fx = fWidth * 0.5f, fy = fHeight * 0.5f, fz = fDepth * 0.5f;
 
 	float x1 = fx * 0.2f, y1 = fy * 0.2f, x2 = fx * 0.1f, y3 = fy * 0.3f, y2 = ((y1 - (fy - y3)) / x1)*x2 + (fy - y3);
 	int i = 0;

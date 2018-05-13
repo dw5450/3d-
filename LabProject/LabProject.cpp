@@ -12,7 +12,7 @@ HINSTANCE hInst;								// 현재 인스턴스입니다.
 TCHAR szTitle[MAX_LOADSTRING];					// 제목 표시줄 텍스트입니다.
 TCHAR szWindowClass[MAX_LOADSTRING];			// 기본 창 클래스 이름입니다.
 
-CGameFramework		gGameFramework;				//게임 프레임 워크를 생성합니다.
+CGameFramework		gGameFramework;      
 
 // 이 코드 모듈에 들어 있는 함수의 정방향 선언입니다.
 ATOM				MyRegisterClass(HINSTANCE hInstance);
@@ -20,7 +20,6 @@ BOOL				InitInstance(HINSTANCE, int);
 LRESULT CALLBACK	WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK	About(HWND, UINT, WPARAM, LPARAM);
 
-//메인문 입니다. 여기서 메세지를 처리 받아 프로그램을 실행시킵니다.
 int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLine, int nCmdShow)
 {
 	UNREFERENCED_PARAMETER(hPrevInstance);
@@ -31,8 +30,8 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 	HACCEL hAccelTable;
 
 	// 전역 문자열을 초기화합니다.
-	LoadString(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);					//제목을 설정합니다.
-	LoadString(hInstance, IDC_LABPROJECT, szWindowClass, MAX_LOADSTRING);			//기본 창 클레스 이름입니다.
+	LoadString(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
+	LoadString(hInstance, IDC_LABPROJECT, szWindowClass, MAX_LOADSTRING);
 	MyRegisterClass(hInstance);
 
 	// 응용 프로그램 초기화를 수행합니다.
@@ -48,7 +47,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 	{
 		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) 
 		{
-			if (msg.message == WM_QUIT) break;				//프로그램을 종료합니다.
+			if (msg.message == WM_QUIT) break;
 			if (!TranslateAccelerator(msg.hwnd, hAccelTable, &msg))
 			{
 				TranslateMessage(&msg);
@@ -57,10 +56,10 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 		} 
 		else 
 		{
-			gGameFramework.FrameAdvance();						//오브젝트들을 이동시키고 화면에 그려줍니다.
+			gGameFramework.FrameAdvance();
 		}
 	}
-	gGameFramework.OnDestroy();								//게임 프레임 워크를 소멸시킵니다.
+	gGameFramework.OnDestroy();
 
 	return (int) msg.wParam;
 }
@@ -115,17 +114,17 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 {
 	hInst = hInstance; // 인스턴스 핸들을 전역 변수에 저장합니다.
 
-	RECT rc = { 0, 0, CLIENT_WIDTH, CLIENT_HEIGHT };				//화면의 크기를 설정합니다.
-	AdjustWindowRect(&rc, WS_OVERLAPPEDWINDOW, FALSE);				//화면의 크기를 저장합니다.
+	RECT rc = { 0, 0, CLIENT_WIDTH, CLIENT_HEIGHT };
+	AdjustWindowRect(&rc, WS_OVERLAPPEDWINDOW, FALSE);
 	int nWidth = rc.right - rc.left;
 	int nHeight = rc.bottom - rc.top;
 	HWND hMainWnd = CreateWindow(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW, 0, 0, nWidth, nHeight, NULL, NULL, hInstance, NULL);
 	if (!hMainWnd) return(FALSE);
 
-	if (!gGameFramework.OnCreate(hInstance, hMainWnd)) return(FALSE);				//게임프레임 워크를 생성합니다.(생성이 가능할 경우에만), 불가능 할 시 인스턴트를 생성하지 않습니다.
+	if (!gGameFramework.OnCreate(hInstance, hMainWnd)) return(FALSE);
 
-	ShowWindow(hMainWnd, nCmdShow);					//화면을 보여줍니다.
-	UpdateWindow(hMainWnd);							//화면을 업데이트 합니다.
+	ShowWindow(hMainWnd, nCmdShow);
+	UpdateWindow(hMainWnd);
 
 	return TRUE;
 }
@@ -148,8 +147,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 	switch (message)
 	{
-
-		//윈도우의 크기를 변경할시 프레임 워크를 잠시 종료합니다.
         case WM_SIZE:
             if (wParam == SIZE_MINIMIZED)
             {
@@ -164,7 +161,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         case WM_RBUTTONDOWN:
         case WM_LBUTTONUP:
         case WM_RBUTTONUP:
-			//키를 입력할시 게임 프레임 워크에 메세지를 전달합니다.
         case WM_KEYDOWN:
 			gGameFramework.OnProcessingWindowMessage(hWnd, message, wParam, lParam);
 			break;

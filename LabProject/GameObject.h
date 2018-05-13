@@ -14,12 +14,13 @@ public:
 
 public:
 	bool						m_bActive = true;								//실행하는가?
-	
+	float						m_fElapseTime = 0;
+
 	CMesh						*m_pMesh = NULL;
-    XMFLOAT4X4					m_xmf4x4World;    
+	XMFLOAT4X4					m_xmf4x4World;
 
 	BoundingBox					m_xmAABB;
-	
+
 	CGameObject					*m_pObjectCollided = NULL;
 
 	DWORD						m_dwColor;
@@ -44,12 +45,12 @@ public:
 	void SetRotationAxis(XMFLOAT3& xmf3RotationAxis) { m_xmf3RotationAxis = Vector3::Normalize(xmf3RotationAxis); }
 	void SetRotationSpeed(float fSpeed) { m_fRotationSpeed = fSpeed; }
 
-	void MoveStrafe(float fDistance=1.0f);
-	void MoveUp(float fDistance=1.0f);
-	void MoveForward(float fDistance=1.0f);
+	void MoveStrafe(float fDistance = 1.0f);
+	void MoveUp(float fDistance = 1.0f);
+	void MoveForward(float fDistance = 1.0f);
 	void Move(XMFLOAT3& vDirection, float fSpeed);
 
-	void Rotate(float fPitch=10.0f, float fYaw=10.0f, float fRoll=10.0f);
+	void Rotate(float fPitch = 10.0f, float fYaw = 10.0f, float fRoll = 10.0f);
 	void Rotate(XMFLOAT3& xmf3Axis, float fAngle);
 
 	XMFLOAT3 GetPosition();
@@ -61,25 +62,7 @@ public:
 	virtual void Render(HDC hDCFrameBuffer, CCamera *pCamera);
 };
 
-
-
-class CBullet : public CGameObject
-{
-public:
-	CBullet();
-	virtual ~CBullet();
-
-public:
-	//float	fElapseTime = 0.0f;								//경과 시간.
-	float m_fShootingRange = 100.0f;
-	float m_fMaxShootingRange = 100.0f;
-	bool ChecksShootingRange();
-
-
-	virtual void Animate(float fElapsedTime);
-
-
-};
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 class CExplosiveObject : public CGameObject
@@ -97,7 +80,7 @@ public:
 	float						m_fExplosionSpeed = 10.0f;
 	float						m_fExplosionRotation = 720.0f;
 
-	
+
 	int LOD = 1;
 	virtual void Animate(float fElapsedTime);
 	virtual void Render(HDC hDCFrameBuffer, CCamera *pCamera);
@@ -109,20 +92,51 @@ public:
 	static void PrepareExplosion();
 };
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 
 class CEnermy : public CExplosiveObject
 {
 public:
+	enum  {
+		Red = 1,
+		Blue = 2, 
+		Green = 3, 
+		Pink = 4
+	};
+public:
 	CEnermy() {};
 	virtual ~CEnermy() {};
 
+	size_t m_iType;
+	void SetByType(size_t Type);
+
 public:
 
-	void TraceObject(CGameObject * );
+	void TraceObject(CGameObject *);
 
-
-
+	
 };
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+class CBullet : public CGameObject
+{
+public:
+	CBullet();
+	virtual ~CBullet();
+
+public:
+	//float	fElapseTime = 0.0f;								//경과 시간.
+	float m_fShootingRange = 100.0f;
+	float m_fMaxShootingRange = 100.0f;
+	bool ChecksShootingRange();
+
+
+	virtual void Animate(float fElapsedTime);
+};
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 class CBoss : public CEnermy
 {
@@ -133,8 +147,8 @@ public:
 
 public:
 
-	size_t m_iLife = 10;
-	
+	size_t m_iLife = 20;
+
 	float m_fBulletCooltime = 0.5f;
 	float m_fBulletInitCooltime = 0.5f;
 
@@ -144,15 +158,7 @@ public:
 
 };
 
-
-
-class CBonusObject : public CExplosiveObject
-{
-public:
-	CBonusObject() {};
-	virtual ~CBonusObject() {};
-
-};
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 class CWallsObject : public CGameObject
@@ -163,7 +169,9 @@ public:
 
 
 public:
-	XMFLOAT4		m_pxmf4WallPlanes[6];
 
 	virtual void Animate(float fElapsedTime);
 };
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
