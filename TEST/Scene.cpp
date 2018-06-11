@@ -16,6 +16,40 @@ CScene::~CScene()
 void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList)
 {
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
+	CMesh *pCubeMesh = new CCubeMeshDiffused(pd3dDevice, pd3dCommandList);
+
+	m_nObjects = 5;
+	m_ppObjects = new CGameObject*[m_nObjects];
+
+	CObjectsShader *pShader = new CObjectsShader();
+	pShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
+	pShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
+
+	m_ppObjects[0] = new CGameObject();
+	m_ppObjects[0]->SetMesh(pCubeMesh);
+	m_ppObjects[0]->SetShader(pShader);
+	m_ppObjects[0]->SetPosition(6.0f, 0.0f, 13.0f);
+
+	m_ppObjects[1] = new CGameObject();
+	m_ppObjects[1]->SetMesh(pCubeMesh);
+	m_ppObjects[1]->SetShader(pShader);
+	m_ppObjects[1]->SetPosition(10.0f, -2.0f, 8.0f);
+
+	m_ppObjects[2] = new CGameObject();
+	m_ppObjects[2]->SetMesh(pCubeMesh);
+	m_ppObjects[2]->SetShader(pShader);
+	m_ppObjects[2]->SetPosition(-5.0f, -4.0f, 11.0f);
+
+	m_ppObjects[3] = new CGameObject();
+	m_ppObjects[3]->SetMesh(pCubeMesh);
+	m_ppObjects[3]->SetShader(pShader);
+	m_ppObjects[3]->SetPosition(-10.0f, -2.0f, 8.0f);
+
+	m_ppObjects[4] = new CGameObject();
+	m_ppObjects[4]->SetMesh(pCubeMesh);
+	m_ppObjects[4]->SetShader(pShader);
+	m_ppObjects[4]->SetPosition(0.0f, 4.0f, 20.0f);
+	m_ppObjects[4]->Rotate(0.0f, 180.0f, 0.0f);
 }
 
 ID3D12RootSignature *CScene::CreateGraphicsRootSignature(ID3D12Device *pd3dDevice)
@@ -57,17 +91,19 @@ void CScene::ReleaseObjects()
 {
 	if (m_pd3dGraphicsRootSignature) m_pd3dGraphicsRootSignature->Release();
 
-	for (auto & data : m_listpObjects)
-		if(data)  delete data;
-	
-	m_listpObjects.~list();
+	if (m_ppObjects)
+	{
+		for (int j = 0; j < m_nObjects; j++) if (m_ppObjects[j]) delete m_ppObjects[j];
+		delete[] m_ppObjects;
+	}
 }
 
 void CScene::ReleaseUploadBuffers()
 {
-	for (auto & data : m_listpObjects)
-		if (data)  data->ReleaseUploadBuffers();
-
+	if (m_ppObjects)
+	{
+		for (int j = 0; j < m_nObjects; j++) if (m_ppObjects[j]) m_ppObjects[j]->ReleaseUploadBuffers();
+	}
 }
 
 bool CScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
@@ -87,8 +123,10 @@ bool CScene::ProcessInput()
 
 void CScene::AnimateObjects(float fTimeElapsed)
 {
-	for (auto & data : m_listpObjects)
-		data->Animate(fTimeElapsed);
+	for (int j = 0; j < m_nObjects; j++)
+	{
+		m_ppObjects[j]->Animate(fTimeElapsed);
+	}
 }
 
 void CScene::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera)
@@ -96,57 +134,10 @@ void CScene::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera
 	pCamera->SetViewportsAndScissorRects(pd3dCommandList);
 	pd3dCommandList->SetGraphicsRootSignature(m_pd3dGraphicsRootSignature);
 	pCamera->UpdateShaderVariables(pd3dCommandList);
+
+	for (int j = 0; j < m_nObjects; j++)
+	{
+		if (m_ppObjects[j]) m_ppObjects[j]->Render(pd3dCommandList, pCamera);
+	}
 }
 
-CGameScene::CGameScene()
-{
-}
-
-CGameScene::~CGameScene()
-{
-}
-
-void CGameScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList)
-{
-	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
-
-	CMesh *pCubeMesh = new CVariousColorsCubeMesh(pd3dDevice, pd3dCommandList);
-	pObjectShader = new CObjectsShader();
-	pObjectShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
-	pObjectShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
-
-	CGameObject *tempEnermy = new CGameObject();
- 	tempEnermy->SetMesh(pCubeMesh);
-	tempEnermy->SetPosition(6.0f, 0.0f, 13.0f);
-	pObjectShader->AddGameObject(tempEnermy);
-	m_listpObjects.emplace_back(tempEnermy);
-	m_listpEnermy.emplace_back(tempEnermy);
-
-
-	CGameObject *tempEnermy1 = new CEnermy();
-	tempEnermy1->SetMesh(pCubeMesh);
-	tempEnermy1->SetPosition(10.0f, 0.0f, 13.0f);
-	pObjectShader->AddGameObject(tempEnermy1);
-	m_listpObjects.emplace_back(tempEnermy1);
-	m_listpEnermy.emplace_back(tempEnermy1);
-
-}
-
-bool CGameScene::ProcessInput()
-{
-	return false;
-}
-
-void CGameScene::AnimateObjects(float fTimeElapsed)
-{
-}
-
-void CGameScene::Render(ID3D12GraphicsCommandList * pd3dCommandList, CCamera * pCamera)
-{
-	CScene::Render(pd3dCommandList, pCamera);
-	//pPlayerShader->Render(pd3dCommandList, pCamera);
-	//pWallShader->Render(pd3dCommandList, pCamera);
-	if (pObjectShader) pObjectShader->Render(pd3dCommandList, pCamera);
-
-
-}

@@ -46,10 +46,10 @@ public:
 	void Rotate(XMFLOAT3 *pxmf3Axis, float fAngle);
 };
 
-class CEnermy : public CGameObject
+class CUfoObject : public CGameObject
 {
 public:
-	CEnermy();
-	virtual ~CEnermy();
+	CUfoObject();
+	virtual ~CUfoObject();
 };
 

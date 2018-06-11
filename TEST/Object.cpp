@@ -41,8 +41,9 @@ void CGameObject::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pC
 
 	if (m_pShader)
 	{
-		m_pShader->UpdateShaderVariable(pd3dCommandList, &m_xmf4x4World);
 		m_pShader->Render(pd3dCommandList, pCamera);
+		m_pShader->UpdateShaderVariable(pd3dCommandList, &m_xmf4x4World);
+		
 	}
 
 	if (m_pMesh) m_pMesh->Render(pd3dCommandList);
@@ -123,11 +124,14 @@ void CGameObject::Rotate(XMFLOAT3 *pxmf3Axis, float fAngle)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-
-CEnermy::CEnermy()
+CUfoObject::CUfoObject()
 {
+
 }
 
-CEnermy::~CEnermy()
+CUfoObject::~CUfoObject()
 {
+
 }
+
+

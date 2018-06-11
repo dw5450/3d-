@@ -91,8 +91,8 @@ void CPlayer::Rotate(float x, float y, float z)
 		if (x != 0.0f)
 		{
 			m_fPitch += x;
-			if (m_fPitch > +360) { m_fPitch -= 360.0f; }
-			if (m_fPitch < 0) { m_fPitch += 360.0f;  }
+			if (m_fPitch > +89.0f) { x -= (m_fPitch - 89.0f); m_fPitch = +89.0f; }
+			if (m_fPitch < -89.0f) { x -= (m_fPitch + 89.0f); m_fPitch = -89.0f; }
 		}
 		if (y != 0.0f)
 		{
@@ -245,13 +245,12 @@ CAirplanePlayer::CAirplanePlayer(ID3D12Device *pd3dDevice, ID3D12GraphicsCommand
 	*pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature)
 {
 	//비행기 메쉬를 생성한다. 
-	CMesh *pAirplaneMesh = new CAirplaneMeshDiffused(pd3dDevice, pd3dCommandList, 6.0f, 6.0f, 1.0f, XMFLOAT4(0.0f, 0.5f, 0.0f, 0.0f));
-	pAirplaneMesh->SetAABB(XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(3.0f, 3.0f, 0.5f));
+	CMesh *pAirplaneMesh = new CAirplaneMeshDiffused(pd3dDevice, pd3dCommandList, 20.0f, 20.0f, 4.0f, XMFLOAT4(0.0f, 0.5f, 0.0f, 0.0f));
 
 	SetMesh(pAirplaneMesh);
 
-	//플레이어의 카메라를 3인칭 카메라로 변경(생성)한다. 
-	m_pCamera = ChangeCamera(THIRD_PERSON_CAMERA, 0.0f);
+	//플레이어의 카메라를 스페이스쉽 카메라로 변경(생성)한다. 
+	m_pCamera = ChangeCamera(SPACESHIP_CAMERA, 0.0f);
 
 	//플레이어를 위한 셰이더 변수를 생성한다. 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);

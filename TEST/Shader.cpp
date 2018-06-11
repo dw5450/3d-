@@ -222,7 +222,8 @@ D3D12_SHADER_BYTECODE CPlayerShader::CreatePixelShader(ID3DBlob **ppd3dShaderBlo
 }
 
 
-void CPlayerShader::CreateShader(ID3D12Device *pd3dDevice, ID3D12RootSignature*pd3dGraphicsRootSignature)
+void CPlayerShader::CreateShader(ID3D12Device *pd3dDevice, ID3D12RootSignature
+	*pd3dGraphicsRootSignature)
 {
 	m_nPipelineStates = 1;
 	m_ppd3dPipelineStates = new ID3D12PipelineState*[m_nPipelineStates];
@@ -282,39 +283,45 @@ void CObjectsShader::CreateShader(ID3D12Device *pd3dDevice, ID3D12RootSignature
 
 void CObjectsShader::ReleaseObjects()
 {
-	for (auto & data : m_listpObjects) {
-		if (data) delete data;
+	if (m_ppObjects)
+	{
+		for (int j = 0; j < m_nObjects; j++)
+		{
+			if (m_ppObjects[j]) delete m_ppObjects[j];
+		}
+		delete[] m_ppObjects;
 	}
+}
 
-	m_listpObjects.~list();
+
+void CObjectsShader::AnimateObjects(float fTimeElapsed)
+{
+	for (int j = 0; j < m_nObjects; j++)
+	{
+		m_ppObjects[j]->Animate(fTimeElapsed);
+	}
 }
 
 
 void CObjectsShader::ReleaseUploadBuffers()
 {
-	for (auto & data : m_listpObjects) data->ReleaseUploadBuffers();
+	if (m_ppObjects)
+	{
+		for (int j = 0; j < m_nObjects; j++) m_ppObjects[j]->ReleaseUploadBuffers();
+	}
 }
 
 
 void CObjectsShader::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera)
 {
 	CShader::Render(pd3dCommandList, pCamera);
-	if (m_listpObjects.size() > 0) {
-		for (auto & data : m_listpObjects) {
-			UpdateShaderVariable(pd3dCommandList, &(data->m_xmf4x4World));
-			data->Render(pd3dCommandList, pCamera);
+	for (int j = 0; j < m_nObjects; j++)
+	{
+		if (m_ppObjects[j])
+		{
+			m_ppObjects[j]->Render(pd3dCommandList, pCamera);
 		}
 	}
-}
-
-void CObjectsShader::AddGameObject(CGameObject *pGameObject)
-{
-	m_listpObjects.emplace_back(pGameObject);
-}
-
-void CObjectsShader::RemoveGameObject(const CGameObject *pGameObject)
-{
-	m_listpObjects.remove_if([pGameObject](CGameObject * p) { return p == pGameObject;});
 }
 
 D3D12_RASTERIZER_DESC CWallObjectShader::CreateRasterizerState()
