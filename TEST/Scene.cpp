@@ -16,7 +16,8 @@ CScene::~CScene()
 void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList)
 {
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
-	CMesh *pCubeMesh = new CCubeMeshDiffused(pd3dDevice, pd3dCommandList);
+	CMesh * pWallMesh =  new CWallCubeMesh(pd3dDevice, pd3dCommandList, 100.0f, 100.0f, 250.0f);
+	CMesh *pCubeMesh = new CCubeMesh(pd3dDevice, pd3dCommandList,2.0f, 2.0f, 2.0f, XMFLOAT4(0.8f, 0.0f, 0.0f, 1.0f));
 
 	m_nObjects = 5;
 	m_ppObjects = new CGameObject*[m_nObjects];
@@ -25,10 +26,15 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	pShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
 	pShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
+	CWallObjectShader *pWallShader = new CWallObjectShader();
+	pWallShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
+	pWallShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
+
+
 	m_ppObjects[0] = new CGameObject();
-	m_ppObjects[0]->SetMesh(pCubeMesh);
-	m_ppObjects[0]->SetShader(pShader);
-	m_ppObjects[0]->SetPosition(6.0f, 0.0f, 13.0f);
+	m_ppObjects[0]->SetMesh(pWallMesh);
+	m_ppObjects[0]->SetShader(pWallShader);
+	m_ppObjects[0]->SetPosition(0.0f, 0.0f, 0.0f);
 
 	m_ppObjects[1] = new CGameObject();
 	m_ppObjects[1]->SetMesh(pCubeMesh);

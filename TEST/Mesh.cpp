@@ -79,11 +79,11 @@ CTriangleMesh::CTriangleMesh(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList
 }
 
 
-CCubeMeshDiffused::CCubeMeshDiffused(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList
-	*pd3dCommandList, float fWidth, float fHeight, float fDepth) : CMesh(pd3dDevice, pd3dCommandList)
+CCubeMesh::CCubeMesh(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList
+	*pd3dCommandList, float fWidth, float fHeight, float fDepth, const  XMFLOAT4 & color) : CMesh(pd3dDevice, pd3dCommandList)
 {
 	//직육면체는 6개의 면 가로(x-축) 길이
-	m_nVertices = 24;
+	m_nVertices = 8;
 	m_nStride = sizeof(CDiffusedVertex);
 	m_nOffset = 0;
 	m_nSlot = 0;
@@ -92,55 +92,16 @@ CCubeMeshDiffused::CCubeMeshDiffused(ID3D12Device *pd3dDevice, ID3D12GraphicsCom
 
 	float fx = fWidth * 0.5f, fy = fHeight * 0.5f, fz = fDepth * 0.5f;
 	//정점 버퍼는 직육면체의 꼭지점 8개에 대한 정점 데이터를 가진다. 
-	CDiffusedVertex pVertices[24];
+	CDiffusedVertex pVertices[8];
+	pVertices[0] = CDiffusedVertex(XMFLOAT3(-fx, +fy, -fz), color);
+	pVertices[1] = CDiffusedVertex(XMFLOAT3(+fx, +fy, -fz), color);
+	pVertices[2] = CDiffusedVertex(XMFLOAT3(+fx, +fy, +fz), color);
+	pVertices[3] = CDiffusedVertex(XMFLOAT3(-fx, +fy, +fz), color);
+	pVertices[4] = CDiffusedVertex(XMFLOAT3(-fx, -fy, -fz), color);
+	pVertices[5] = CDiffusedVertex(XMFLOAT3(+fx, -fy, -fz), color);
+	pVertices[6] = CDiffusedVertex(XMFLOAT3(+fx, -fy, +fz), color);
+	pVertices[7] = CDiffusedVertex(XMFLOAT3(-fx, -fy, +fz), color);
 
-	//앞면의 점 정보
-
-	pVertices[0] = CDiffusedVertex(XMFLOAT3(-fx, +fy, -fz), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f));
-	pVertices[1] = CDiffusedVertex(XMFLOAT3(+fx, +fy, -fz), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f));
-	pVertices[2] = CDiffusedVertex(XMFLOAT3(+fx, +fy, +fz), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f));
-	pVertices[3] = CDiffusedVertex(XMFLOAT3(-fx, +fy, +fz), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f));
-
-
-	//윗면의 점 정보
-
-	pVertices[4] = CDiffusedVertex(XMFLOAT3(-fx, -fy, -fz), XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f));
-	pVertices[5] = CDiffusedVertex(XMFLOAT3(+fx, -fy, -fz), XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f));
-	pVertices[6] = CDiffusedVertex(XMFLOAT3(-fx, +fy, -fz), XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f));
-	pVertices[7] = CDiffusedVertex(XMFLOAT3(+fx, +fy, -fz), XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f));
-
-	//뒷면의 점 정보
-	pVertices[8] = CDiffusedVertex(XMFLOAT3(-fx, +fy, -fz), XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f));
-	pVertices[9] = CDiffusedVertex(XMFLOAT3(-fx, +fy, +fz), XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f));
-	pVertices[10] = CDiffusedVertex(XMFLOAT3(-fx, -fy, -fz), XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f));
-	pVertices[11] = CDiffusedVertex(XMFLOAT3(-fx, -fy, +fz), XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f));
-
-	
-	//옆면 R 이거랑
-	pVertices[12] = CDiffusedVertex(XMFLOAT3(+fx, +fy, -fz), XMFLOAT4(0.0f, 1.0f, 1.0f, 1.0f));
-	pVertices[13] = CDiffusedVertex(XMFLOAT3(+fx, +fy, +fz), XMFLOAT4(0.0f, 1.0f, 1.0f, 1.0f));
-	pVertices[14] = CDiffusedVertex(XMFLOAT3(+fx, -fy, -fz), XMFLOAT4(0.0f, 1.0f, 1.0f, 1.0f));
-	pVertices[15] = CDiffusedVertex(XMFLOAT3(+fx, -fy, +fz), XMFLOAT4(0.0f, 1.0f, 1.0f, 1.0f));
-
-
-	
-	// 뒷면 점 정보 이거랑
-	pVertices[16] = CDiffusedVertex(XMFLOAT3(+fx, +fy, +fz + 0.01f), XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f));
-	pVertices[17] = CDiffusedVertex(XMFLOAT3(-fx, +fy, +fz + 0.01f), XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f));
-	pVertices[18] = CDiffusedVertex(XMFLOAT3(+fx, -fy, +fz + 0.01f), XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f));
-	pVertices[19] = CDiffusedVertex(XMFLOAT3(-fx, -fy, +fz + 0.01f), XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f));
-
-	// 밑면 점 정보이거
-
-	pVertices[20] = CDiffusedVertex(XMFLOAT3(-fx, -fy - 0.01f, -fz), XMFLOAT4(1.0f, 0.0f, 1.0f, 1.0f));
-	pVertices[21] = CDiffusedVertex(XMFLOAT3(+fx, -fy - 0.01f, -fz), XMFLOAT4(1.0f, 0.0f, 1.0f, 1.0f));
-	pVertices[22] = CDiffusedVertex(XMFLOAT3(+fx, -fy - 0.01f, +fz), XMFLOAT4(1.0f, 0.0f, 1.0f, 1.0f));
-	pVertices[23] = CDiffusedVertex(XMFLOAT3(-fx, -fy - 0.01f, +fz), XMFLOAT4(1.0f, 0.0f, 1.0f, 1.0f));
-
-
-
-
-	//지금 점이 꼬임
 	m_pd3dVertexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, pVertices,
 		m_nStride * m_nVertices, D3D12_HEAP_TYPE_DEFAULT,
 		D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dVertexUploadBuffer);
@@ -155,39 +116,30 @@ CCubeMeshDiffused::CCubeMeshDiffused(ID3D12Device *pd3dDevice, ID3D12GraphicsCom
 	덱스를 가져야 한다.*/
 	m_nIndices = 36;
 	UINT pnIndices[36];
-
 	//ⓐ 앞면(Front) 사각형의 위쪽 삼각형
 	pnIndices[0] = 3; pnIndices[1] = 1; pnIndices[2] = 0;
 	//ⓑ 앞면(Front) 사각형의 아래쪽 삼각형
 	pnIndices[3] = 2; pnIndices[4] = 1; pnIndices[5] = 3;
-
 	//ⓒ 윗면(Top) 사각형의 위쪽 삼각형
-	pnIndices[6] = 6; pnIndices[7] = 5; pnIndices[8] = 4;
+	pnIndices[6] = 0; pnIndices[7] = 5; pnIndices[8] = 4;
 	//ⓓ 윗면(Top) 사각형의 아래쪽 삼각형
-	pnIndices[9] = 7; pnIndices[10] = 5; pnIndices[11] = 6;
-
+	pnIndices[9] = 1; pnIndices[10] = 5; pnIndices[11] = 0;
 	//ⓔ 뒷면(Back) 사각형의 위쪽 삼각형
-	pnIndices[12] = 9; pnIndices[13] = 10; pnIndices[14] = 11;
+	pnIndices[12] = 3; pnIndices[13] = 4; pnIndices[14] = 7;
 	//ⓕ 뒷면(Back) 사각형의 아래쪽 삼각형
-	pnIndices[15] = 8; pnIndices[16] = 10; pnIndices[17] = 9;
-
+	pnIndices[15] = 0; pnIndices[16] = 4; pnIndices[17] = 3;
 	//ⓖ 아래면(Bottom) 사각형의 위쪽 삼각형
-	pnIndices[18] = 12; pnIndices[19] = 15; pnIndices[20] = 14;
+	pnIndices[18] = 1; pnIndices[19] = 6; pnIndices[20] = 5;
 	//ⓗ 아래면(Bottom) 사각형의 아래쪽 삼각형
-	pnIndices[21] = 13; pnIndices[22] = 15; pnIndices[23] = 12;
-
-
+	pnIndices[21] = 2; pnIndices[22] = 6; pnIndices[23] = 1;
 	//ⓘ 옆면(Left) 사각형의 위쪽 삼각형
-	pnIndices[24] = 16; pnIndices[25] = 19; pnIndices[26] = 18;
+	pnIndices[24] = 2; pnIndices[25] = 7; pnIndices[26] = 6;
 	//ⓙ 옆면(Left) 사각형의 아래쪽 삼각형
-	pnIndices[27] = 17; pnIndices[28] = 19; pnIndices[29] = 16;
-
-
+	pnIndices[27] = 3; pnIndices[28] = 7; pnIndices[29] = 2;
 	//ⓚ 옆면(Right) 사각형의 위쪽 삼각형
-	pnIndices[30] = 22; pnIndices[31] = 20; pnIndices[32] = 21;
+	pnIndices[30] = 6; pnIndices[31] = 4; pnIndices[32] = 5;
 	//ⓛ 옆면(Right) 사각형의 아래쪽 삼각형
-	pnIndices[33] = 23; pnIndices[34] = 20; pnIndices[35] =22;
-
+	pnIndices[33] = 7; pnIndices[34] = 4; pnIndices[35] = 6;
 	//인덱스 버퍼를 생성한다. 
 	m_pd3dIndexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, pnIndices,
 		sizeof(UINT) * m_nIndices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_INDEX_BUFFER,
@@ -199,9 +151,61 @@ CCubeMeshDiffused::CCubeMeshDiffused(ID3D12Device *pd3dDevice, ID3D12GraphicsCom
 }
 
 
-CCubeMeshDiffused::~CCubeMeshDiffused()
+CCubeMesh::~CCubeMesh()
 {
 }
+
+
+CWallCubeMesh::CWallCubeMesh(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList
+	*pd3dCommandList, float fWidth, float fHeight, float fDepth, const  XMFLOAT4 & color) : CMesh(pd3dDevice, pd3dCommandList)
+{
+	//직육면체는 6개의 면 가로(x-축) 길이
+	m_nVertices = 160;
+	m_nStride = sizeof(CDiffusedVertex);
+	m_nOffset = 0;
+	m_nSlot = 0;
+	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_LINELIST;
+	//fWidth: 직육면체 가로(x-축) 길이, fHeight: 직육면체 세로(y-축) 길이, fDepth: 직육면체 깊이(z-축) 길이
+
+	float fx = fWidth * 0.5f;
+	float fy = fHeight * 0.5f;
+	float fz = fDepth * 0.5f;
+	float fcz = fDepth * (0.05f);
+	//정점 버퍼는 직육면체의 꼭지점 8개에 대한 정점 데이터를 가진다. 
+	CDiffusedVertex pVertices[160];
+
+	for (int i = 0; i < 20; i++)
+	{
+		pVertices[i * 8 + 0] = CDiffusedVertex(XMFLOAT3(-fx, +fy, -fz + fcz * i), color);
+		pVertices[i * 8 + 1] = CDiffusedVertex(XMFLOAT3(fx, +fy, -fz + fcz * i), color);//1
+
+		pVertices[i * 8 + 2] = CDiffusedVertex(XMFLOAT3(fx, +fy, -fz + fcz * i), color);
+		pVertices[i * 8 + 3] = CDiffusedVertex(XMFLOAT3(fx, -fy, -fz + fcz * i), color);//2
+
+		pVertices[i * 8 + 4] = CDiffusedVertex(XMFLOAT3(fx, -fy, -fz + fcz * i), color);
+		pVertices[i * 8 + 5] = CDiffusedVertex(XMFLOAT3(-fx, -fy, -fz + fcz * i), color);//3
+
+		pVertices[i * 8 + 6] = CDiffusedVertex(XMFLOAT3(-fx, -fy, -fz + fcz * i), color);
+		pVertices[i * 8 + 7] = CDiffusedVertex(XMFLOAT3(-fx, +fy, -fz + fcz * i), color);//4
+
+	}
+
+
+	
+	m_pd3dVertexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, pVertices,
+		m_nStride * m_nVertices, D3D12_HEAP_TYPE_DEFAULT,
+		D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dVertexUploadBuffer);
+	m_d3dVertexBufferView.BufferLocation = m_pd3dVertexBuffer->GetGPUVirtualAddress();
+	m_d3dVertexBufferView.StrideInBytes = m_nStride;
+	m_d3dVertexBufferView.SizeInBytes = m_nStride * m_nVertices;
+
+}
+
+
+CWallCubeMesh::~CWallCubeMesh()
+{
+}
+
 
 
 CAirplaneMeshDiffused::CAirplaneMeshDiffused(ID3D12Device *pd3dDevice,
@@ -391,3 +395,280 @@ CAirplaneMeshDiffused::CAirplaneMeshDiffused(ID3D12Device *pd3dDevice,
 CAirplaneMeshDiffused::~CAirplaneMeshDiffused()
 {
 }
+
+CVariousColorsCubeMesh::CVariousColorsCubeMesh(ID3D12Device * pd3dDevice, ID3D12GraphicsCommandList * pd3dCommandList, float fWidth, float fHeight, float fDepth) : CMesh(pd3dDevice, pd3dCommandList)
+{
+	//직육면체는 6개의 면 가로(x-축) 길이
+	m_nVertices = 24;
+	m_nStride = sizeof(CDiffusedVertex);
+	m_nOffset = 0;
+	m_nSlot = 0;
+	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+	//fWidth: 직육면체 가로(x-축) 길이, fHeight: 직육면체 세로(y-축) 길이, fDepth: 직육면체 깊이(z-축) 길이
+
+	float fx = fWidth * 0.5f, fy = fHeight * 0.5f, fz = fDepth * 0.5f;
+	//정점 버퍼는 직육면체의 꼭지점 8개에 대한 정점 데이터를 가진다. 
+	CDiffusedVertex pVertices[24];
+
+	//앞면의 점 정보
+
+	pVertices[0] = CDiffusedVertex(XMFLOAT3(-fx, +fy, -fz), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f));
+	pVertices[1] = CDiffusedVertex(XMFLOAT3(+fx, +fy, -fz), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f));
+	pVertices[2] = CDiffusedVertex(XMFLOAT3(+fx, +fy, +fz), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f));
+	pVertices[3] = CDiffusedVertex(XMFLOAT3(-fx, +fy, +fz), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f));
+
+
+	//윗면의 점 정보
+
+	pVertices[4] = CDiffusedVertex(XMFLOAT3(-fx, -fy, -fz), XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f));
+	pVertices[5] = CDiffusedVertex(XMFLOAT3(+fx, -fy, -fz), XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f));
+	pVertices[6] = CDiffusedVertex(XMFLOAT3(-fx, +fy, -fz), XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f));
+	pVertices[7] = CDiffusedVertex(XMFLOAT3(+fx, +fy, -fz), XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f));
+
+	//뒷면의 점 정보
+	pVertices[8] = CDiffusedVertex(XMFLOAT3(-fx, +fy, -fz), XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f));
+	pVertices[9] = CDiffusedVertex(XMFLOAT3(-fx, +fy, +fz), XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f));
+	pVertices[10] = CDiffusedVertex(XMFLOAT3(-fx, -fy, -fz), XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f));
+	pVertices[11] = CDiffusedVertex(XMFLOAT3(-fx, -fy, +fz), XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f));
+
+
+	//옆면 R 이거랑
+	pVertices[12] = CDiffusedVertex(XMFLOAT3(+fx, +fy, -fz), XMFLOAT4(0.0f, 1.0f, 1.0f, 1.0f));
+	pVertices[13] = CDiffusedVertex(XMFLOAT3(+fx, +fy, +fz), XMFLOAT4(0.0f, 1.0f, 1.0f, 1.0f));
+	pVertices[14] = CDiffusedVertex(XMFLOAT3(+fx, -fy, -fz), XMFLOAT4(0.0f, 1.0f, 1.0f, 1.0f));
+	pVertices[15] = CDiffusedVertex(XMFLOAT3(+fx, -fy, +fz), XMFLOAT4(0.0f, 1.0f, 1.0f, 1.0f));
+
+
+
+	// 뒷면 점 정보 이거랑
+	pVertices[16] = CDiffusedVertex(XMFLOAT3(+fx, +fy, +fz + 0.01f), XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f));
+	pVertices[17] = CDiffusedVertex(XMFLOAT3(-fx, +fy, +fz + 0.01f), XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f));
+	pVertices[18] = CDiffusedVertex(XMFLOAT3(+fx, -fy, +fz + 0.01f), XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f));
+	pVertices[19] = CDiffusedVertex(XMFLOAT3(-fx, -fy, +fz + 0.01f), XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f));
+
+	// 밑면 점 정보이거
+
+	pVertices[20] = CDiffusedVertex(XMFLOAT3(-fx, -fy - 0.01f, -fz), XMFLOAT4(1.0f, 0.0f, 1.0f, 1.0f));
+	pVertices[21] = CDiffusedVertex(XMFLOAT3(+fx, -fy - 0.01f, -fz), XMFLOAT4(1.0f, 0.0f, 1.0f, 1.0f));
+	pVertices[22] = CDiffusedVertex(XMFLOAT3(+fx, -fy - 0.01f, +fz), XMFLOAT4(1.0f, 0.0f, 1.0f, 1.0f));
+	pVertices[23] = CDiffusedVertex(XMFLOAT3(-fx, -fy - 0.01f, +fz), XMFLOAT4(1.0f, 0.0f, 1.0f, 1.0f));
+
+
+	//지금 점이 꼬임
+	m_pd3dVertexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, pVertices,
+		m_nStride * m_nVertices, D3D12_HEAP_TYPE_DEFAULT,
+		D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dVertexUploadBuffer);
+
+	//정점 버퍼 뷰를 생성한다. 
+	m_d3dVertexBufferView.BufferLocation = m_pd3dVertexBuffer->GetGPUVirtualAddress();
+	m_d3dVertexBufferView.StrideInBytes = m_nStride;
+	m_d3dVertexBufferView.SizeInBytes = m_nStride * m_nVertices;
+
+	/*인덱스 버퍼는 직육면체의 6개의 면(사각형)에 대한 기하 정보를 갖는다. 삼각형 리스트로 직육면체를 표현할 것이
+	므로 각 면은 2개의 삼각형을 가지고 각 삼각형은 3개의 정점이 필요하다. 즉, 인덱스 버퍼는 전체 36(=6*2*3)개의 인
+	덱스를 가져야 한다.*/
+	m_nIndices = 36;
+	UINT pnIndices[36];
+
+	//ⓐ 앞면(Front) 사각형의 위쪽 삼각형
+	pnIndices[0] = 3; pnIndices[1] = 1; pnIndices[2] = 0;
+	//ⓑ 앞면(Front) 사각형의 아래쪽 삼각형
+	pnIndices[3] = 2; pnIndices[4] = 1; pnIndices[5] = 3;
+
+	//ⓒ 윗면(Top) 사각형의 위쪽 삼각형
+	pnIndices[6] = 6; pnIndices[7] = 5; pnIndices[8] = 4;
+	//ⓓ 윗면(Top) 사각형의 아래쪽 삼각형
+	pnIndices[9] = 7; pnIndices[10] = 5; pnIndices[11] = 6;
+
+	//ⓔ 뒷면(Back) 사각형의 위쪽 삼각형
+	pnIndices[12] = 9; pnIndices[13] = 10; pnIndices[14] = 11;
+	//ⓕ 뒷면(Back) 사각형의 아래쪽 삼각형
+	pnIndices[15] = 8; pnIndices[16] = 10; pnIndices[17] = 9;
+
+	//ⓖ 아래면(Bottom) 사각형의 위쪽 삼각형
+	pnIndices[18] = 12; pnIndices[19] = 15; pnIndices[20] = 14;
+	//ⓗ 아래면(Bottom) 사각형의 아래쪽 삼각형
+	pnIndices[21] = 13; pnIndices[22] = 15; pnIndices[23] = 12;
+
+
+	//ⓘ 옆면(Left) 사각형의 위쪽 삼각형
+	pnIndices[24] = 16; pnIndices[25] = 19; pnIndices[26] = 18;
+	//ⓙ 옆면(Left) 사각형의 아래쪽 삼각형
+	pnIndices[27] = 17; pnIndices[28] = 19; pnIndices[29] = 16;
+
+
+	//ⓚ 옆면(Right) 사각형의 위쪽 삼각형
+	pnIndices[30] = 22; pnIndices[31] = 20; pnIndices[32] = 21;
+	//ⓛ 옆면(Right) 사각형의 아래쪽 삼각형
+	pnIndices[33] = 23; pnIndices[34] = 20; pnIndices[35] = 22;
+
+	//인덱스 버퍼를 생성한다. 
+	m_pd3dIndexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, pnIndices,
+		sizeof(UINT) * m_nIndices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_INDEX_BUFFER,
+		&m_pd3dIndexUploadBuffer);
+	//인덱스 버퍼 뷰를 생성한다. 
+	m_d3dIndexBufferView.BufferLocation = m_pd3dIndexBuffer->GetGPUVirtualAddress();
+	m_d3dIndexBufferView.Format = DXGI_FORMAT_R32_UINT;
+	m_d3dIndexBufferView.SizeInBytes = sizeof(UINT) * m_nIndices;
+
+}
+
+CVariousColorsCubeMesh::~CVariousColorsCubeMesh()
+{
+}
+
+//CWallMesh::CWallMesh(ID3D12Device * pd3dDevice, ID3D12GraphicsCommandList * pd3dCommandList, float fWidth, float fHeight, float fDepth) : CMesh(pd3dDevice, pd3dCommandList)
+//{
+//	//직육면체는 6개의 면 가로(x-축) 길이
+//	m_nVertices = 21 * 21 * 4;					//20 * 20 * 4
+//	m_nStride = sizeof(CDiffusedVertex);
+//	m_nOffset = 0;
+//	m_nSlot = 0;
+//	//fWidth: 직육면체 가로(x-축) 길이, fHeight: 직육면체 세로(y-축) 길이, fDepth: 직육면체 깊이(z-축) 길이
+//	CDiffusedVertex pVertices[1600];
+//
+//	float fx = fWidth * 0.5f, fy = fHeight * 0.5f, fz = fDepth * 0.5f;
+//	float sub_fx = 0.05f * fWidth;
+//	float sub_fy = 0.05f * fHeight;
+//	float sub_fz = 0.05f * fDepth;
+//	//정점 버퍼 // 윗면
+//	for (int i = 0; i < 21 ; i++)
+//		for (int j = 0; j < 21; j++) {
+//			size_t index = i * 21 + j;
+//			pVertices[index] = CDiffusedVertex(XMFLOAT3(-fx + sub_fx * i, +fy, -fz + sub_fz * j), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
+//		}
+//
+//	//정점 버퍼 // 아랫면
+//	for (int i = 0; i < 21; i++)
+//		for (int j = 0; j < 21; j++) {
+//			size_t index = 441 + i * 21 + j;
+//			pVertices[index] = CDiffusedVertex(XMFLOAT3(-fx + sub_fx * i, -fy, -fz + sub_fz * j), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
+//		}
+//
+//	//정점 버퍼 // 오른쪽면
+//
+//	for (int i = 0; i < 21; i++)
+//		for (int j = 0; j < 21; j++) {
+//			size_t index = 882 + i * 21 + j;
+//			pVertices[index] = CDiffusedVertex(XMFLOAT3(+fx, -fy + sub_fy * i, -fz + sub_fz * j), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
+//		}
+//
+//
+//	//정점 버퍼 // 왼쪽면
+//	for (int i = 0; i < 21; i++)
+//		for (int j = 0; j < 21; j++) {
+//			size_t index = 1323 + i * 21 + j;
+//			pVertices[index] = CDiffusedVertex(XMFLOAT3(-fx, -fy + sub_fy * i, -fz + sub_fz * j), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
+//		}
+//
+//	m_pd3dVertexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, pVertices,
+//		m_nStride * m_nVertices, D3D12_HEAP_TYPE_DEFAULT,
+//		D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dVertexUploadBuffer);
+//
+//	//정점 버퍼 뷰를 생성한다. 
+//	m_d3dVertexBufferView.BufferLocation = m_pd3dVertexBuffer->GetGPUVirtualAddress();
+//	m_d3dVertexBufferView.StrideInBytes = m_nStride;
+//	m_d3dVertexBufferView.SizeInBytes = m_nStride * m_nVertices;
+//
+//	/*인덱스 버퍼는 직육면체의 6개의 면(사각형)에 대한 기하 정보를 갖는다. 삼각형 리스트로 직육면체를 표현할 것이
+//	므로 각 면은 2개의 삼각형을 가지고 각 삼각형은 3개의 정점이 필요하다. 즉, 인덱스 버퍼는 전체 36(=6*2*3)개의 인
+//	덱스를 가져야 한다.*/
+//	//m_nIndices = 441; //(width * 2 * (len-1) + (len-2))* 4 //  (20 * 2 * 19 +18) * 4
+//	//UINT pnIndices[441];
+//	//윗면 
+//	/*int pnIndices_index = 0;
+//	for (int i = 0; i < 20; i++)
+//	{
+//		for (int j = 0; j < 2 - ; j++) {
+//
+//		}
+//
+//	}
+//*/
+//	////밑면
+//	//for (int z = 0; z < 19; z++)
+//	//{
+//	//	if ((z % 2) == 0)
+//	//	{
+//	//		for (int x = 0; x < 20; x++)
+//	//		{
+//	//			if ((x == 0) && (z > 0)) pnIndices[pnIndices_index++] = 400 +(UINT)(x + (z * 20));
+//
+//	//			pnIndices[pnIndices_index++] = 400 +(UINT)(x + (z + 20));
+//	//			pnIndices[pnIndices_index++] = 400 + (UINT)(x + (z + 20)) + 20;
+//	//		}
+//	//	}
+//	//	else
+//	//	{
+//	//		for (int x = 19; x >= 0; x--)
+//	//		{
+//	//			if (x == 19) pnIndices[pnIndices_index++] = 400 + UINT(x + z * 20);
+//	//			pnIndices[pnIndices_index++] = 400 + (UINT)(x + (z + 20));
+//	//			pnIndices[pnIndices_index++] = 400 +(UINT)(x + (z + 20)) + 20;
+//	//		}
+//	//	}
+//	//}
+//
+//	////옆면(오른쪽)
+//	//for (int z = 0; z < 19; z++)
+//	//{
+//	//	if ((z % 2) == 0)
+//	//	{
+//	//		for (int x = 0; x < 20; x++)
+//	//		{
+//	//			if ((x == 0) && (z > 0)) pnIndices[pnIndices_index++] = 800 + (UINT)(x + (z * 20));
+//
+//	//			pnIndices[pnIndices_index++] = 800 + (UINT)(x + (z + 20));
+//	//			pnIndices[pnIndices_index++] = 800 + (UINT)(x + (z + 20)) + 20;
+//	//		}
+//	//	}
+//	//	else
+//	//	{
+//	//		for (int x = 19; x >= 0; x--)
+//	//		{
+//	//			if (x == 19) pnIndices[pnIndices_index++] = 800 + UINT(x + z * 20);
+//	//			pnIndices[pnIndices_index++] = 800 + (UINT)(x + (z + 20));
+//	//			pnIndices[pnIndices_index++] = 800 + (UINT)(x + (z + 20)) + 20;
+//	//		}
+//	//	}
+//	//}
+//
+//
+//	////옆면 (왼쪽)
+//	//for (int z = 0; z < 19; z++)
+//	//{
+//	//	if ((z % 2) == 0)
+//	//	{
+//	//		for (int x = 0; x < 20; x++)
+//	//		{
+//	//			if ((x == 0) && (z > 0)) pnIndices[pnIndices_index++] = 1200 + (UINT)(x + (z * 20));
+//
+//	//			pnIndices[pnIndices_index++] = 1200 + (UINT)(x + (z + 20));
+//	//			pnIndices[pnIndices_index++] = 1200 + (UINT)(x + (z + 20)) + 20;
+//	//		}
+//	//	}
+//	//	else
+//	//	{
+//	//		for (int x = 19; x >= 0; x--)
+//	//		{
+//	//			if (x == 19) pnIndices[pnIndices_index++] = 1200 + UINT(x + z * 20);
+//	//			pnIndices[pnIndices_index++] = 1200 + (UINT)(x + (z + 20));
+//	//			pnIndices[pnIndices_index++] = 1200 + (UINT)(x + (z + 20)) + 20;
+//	//		}
+//	//	}
+//	//}
+//
+//	
+//	////인덱스 버퍼를 생성한다. 
+//	//m_pd3dIndexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, pnIndices,
+//	//	sizeof(UINT) * m_nIndices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_INDEX_BUFFER,
+//	//	&m_pd3dIndexUploadBuffer);
+//	////인덱스 버퍼 뷰를 생성한다. 
+//	//m_d3dIndexBufferView.BufferLocation = m_pd3dIndexBuffer->GetGPUVirtualAddress();
+//	//m_d3dIndexBufferView.Format = DXGI_FORMAT_R32_UINT;
+//	//m_d3dIndexBufferView.SizeInBytes = sizeof(UINT) * m_nIndices;
+//}
+//
+//CWallMesh::~CWallMesh()
+//{
+//}
