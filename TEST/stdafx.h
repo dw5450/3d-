@@ -14,14 +14,14 @@
 #include <malloc.h>
 #include <memory.h>
 #include <tchar.h>
-#include <math.h>
-
+#include <math.h>`
 #include <string>
 #include <wrl.h>
 #include <shellapi.h>
 
 #include <fstream>
 #include <vector>
+#include <list>
 using namespace std;
 
 #include <d3d12.h>

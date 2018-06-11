@@ -123,14 +123,11 @@ void CGameObject::Rotate(XMFLOAT3 *pxmf3Axis, float fAngle)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-CUfoObject::CUfoObject()
-{
 
+CEnermy::CEnermy()
+{
 }
 
-CUfoObject::~CUfoObject()
+CEnermy::~CEnermy()
 {
-
 }
-
-

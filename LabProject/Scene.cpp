@@ -568,7 +568,7 @@ void CScene::ResponObject(float fElapsedTime)
 			Enermy->SetRotationSpeed(120);
 
 			m_plEnermys.emplace_back(Enermy);
-		}
+		}	
 		//delete Enermy;
 	}
 

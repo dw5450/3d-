@@ -6,10 +6,14 @@ public:
 	CMesh(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList);
 	virtual ~CMesh();
 
+public:
+	BoundingBox			m_xmAABB;
+
 private:
 	int m_nReferences = 0;
 
 public:
+
 	void AddRef() { m_nReferences++; }
 	void Release() { if (--m_nReferences <= 0) delete this; }
 	void ReleaseUploadBuffers();
@@ -39,6 +43,7 @@ protected:
 
 public:
 	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList);
+	void SetAABB(XMFLOAT3& xmCenter, XMFLOAT3& xmExtents) { m_xmAABB = BoundingBox(xmCenter, xmExtents); }
 };
 
 
@@ -87,14 +92,23 @@ public:
 };
 
 
-class CCubeMeshDiffused : public CMesh
+
+
+class CVariousColorsCubeMesh : public CMesh
 {
 public:
 	//직육면체의 가로, 세로, 깊이의 길이를 지정하여 직육면체 메쉬를 생성한다. 
-	CCubeMeshDiffused(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, float fWidth = 2.0f, float fHeight = 2.0f, float fDepth = 2.0f);
-	virtual ~CCubeMeshDiffused();
+	CVariousColorsCubeMesh(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, float fWidth = 2.0f, float fHeight = 2.0f, float fDepth = 2.0f);
+	virtual ~CVariousColorsCubeMesh();
 };
 
+class COneColorsCubeMesh : public CMesh
+{
+public:
+	//직육면체의 가로, 세로, 깊이의 길이를 지정하여 직육면체 메쉬를 생성한다. 
+	COneColorsCubeMesh(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, float fWidth = 2.0f, float fHeight = 2.0f, float fDepth = 2.0f);
+	virtual ~COneColorsCubeMesh();
+};
 
 class CAirplaneMeshDiffused : public CMesh
 {
