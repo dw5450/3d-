@@ -28,8 +28,9 @@ public:
 	void ReleaseUploadBuffers();
 
 protected:
+	CPlayer * m_pPlayer = NULL;
+	CWallsObject * m_pWallsObject = NULL;
+	std::list<CEnermy *>				m_listpEnermys;
 	ID3D12RootSignature			*m_pd3dGraphicsRootSignature = NULL;
 
-	CGameObject					**m_ppObjects = 0;
-	int							m_nObjects = 0;
 };
