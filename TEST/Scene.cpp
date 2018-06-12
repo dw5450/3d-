@@ -39,11 +39,11 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 
 	//벽을 만들어보자
 	m_pWallsObject = new CWallsObject();
+	m_pWallsObject->SetPosition(0.0f, 0.0f, 125.0f);
+	m_pWallsObject->SetMovingDirection(XMFLOAT3(0.0f, 0.0f, 0.0f));
+	m_pWallsObject->m_fMovingSpeed = 0.0f;
 	m_pWallsObject->SetMesh(m_pWallMesh);
 	m_pWallsObject->SetShader(m_pWallShader);
-	m_pWallsObject->SetPosition(0.0f, 0.0f, 125.0f);
-	m_pWallsObject->SetMovingDirection(XMFLOAT3(0, 0, 0));
-	m_pWallsObject->m_fMovingSpeed = 0.0f;
 
 	//보스 생성
 	m_pBoss = new CBoss();
@@ -167,6 +167,72 @@ void CScene::ResponEnermy(float fElapsedTime)
 
 void CScene::CheckPlayerByWallCollision(float fElapseTime)
 {
+	ContainmentType containType = m_pWallsObject->m_xmAABB.Contains(m_pPlayer->m_xmAABB);					//벽으로 충돌을 체크
+	float wall_revise = WALL_HALF_SIZE - 3;
+	XMFLOAT3 position = m_pPlayer->GetPosition();
+	if (m_pPlayer->GetPosition().x < -wall_revise) {
+		m_pPlayer->SetPosition(XMFLOAT3(-wall_revise, position.y, position.z));
+	}
+
+	else if (m_pPlayer->GetPosition().x > wall_revise) {
+		m_pPlayer->SetPosition(XMFLOAT3(wall_revise, position.y, position.z));
+
+	}
+
+	if (m_pPlayer->GetPosition().y < -wall_revise) {
+		m_pPlayer->SetPosition(XMFLOAT3(position.x, -wall_revise, position.z));
+	}
+
+	else if (m_pPlayer->GetPosition().y > wall_revise) {
+		m_pPlayer->SetPosition(XMFLOAT3(position.x, wall_revise, position.z));
+
+	}
+
+	if (m_pPlayer->GetPosition().z < 3) {
+		m_pPlayer->SetPosition(XMFLOAT3(position.x, position.y, 3.0f));
+	}
+
+	else if (m_pPlayer->GetPosition().z > 997) {
+		m_pPlayer->SetPosition(XMFLOAT3(position.x, position.y,997.0f));
+
+	}
+	//XMMATRIX mtxRotate = XMMatrixRotationRollPitchYaw(XMConvertToRadians(-90.0f), 0.0f, 0.0f);
+	//XMFLOAT3 MoveDirection = Vector3::TransformCoord(m_pPlayer->m_xmf3MovingDirection, mtxRotate);
+
+	XMFLOAT3 & MoveDirection = m_pPlayer->m_xmf3MovingDirection;
+	if (m_pPlayer->GetLook().z > 0) {				//플레이어가 앞을 바라 볼 경우
+		if (m_pPlayer->GetPosition().z > 750)
+			m_pWallsObject->SetPosition(0, 0, 850.0f);
+
+		if (MoveDirection.z < 0) { //뒤로 갈 경우
+			if (m_pPlayer->GetPosition().z < m_pWallsObject->GetPosition().z - 112.5) {
+				m_pWallsObject->MoveForward(-12.5f);
+			}
+		}
+		else   // 앞으로 갈경우
+		{
+			if (m_pPlayer->GetPosition().z > m_pWallsObject->GetPosition().z - 100) {
+				m_pWallsObject->MoveForward(12.5f);
+			}
+		}
+	}
+	else                                            //플레이어가 뒤를 바라 볼 경우
+	{
+		if (m_pPlayer->GetPosition().z < 250)
+			m_pWallsObject->SetPosition(0, 0, 150.0f);
+
+		if (MoveDirection.z >0) { //앞으로 갈 경우
+			if (m_pPlayer->GetPosition().z > m_pWallsObject->GetPosition().z + 100) {
+				m_pWallsObject->MoveForward(12.5f);
+			}
+		}
+		else   // 뒤로 갈경우
+		{
+			if (m_pPlayer->GetPosition().z < m_pWallsObject->GetPosition().z + 100) {
+				m_pWallsObject->MoveForward(-12.5f);
+			}
+		}
+	}
 }
 
 void CScene::CheckBulletByWallCollision()
@@ -216,6 +282,7 @@ void CScene::AnimateObjects(float fTimeElapsed)
 
 
 	//충돌체크를 진행한다.
+	CheckPlayerByWallCollision(fTimeElapsed);
 	CheckEnermyByWallCollision();
 
 

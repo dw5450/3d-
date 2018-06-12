@@ -79,6 +79,8 @@ void CPlayer::Move(const XMFLOAT3& xmf3Shift, bool bUpdateVelocity)
 	else
 	{
 		m_xmf3Position = Vector3::Add(m_xmf3Position, xmf3Shift);
+		CGameObject::SetPosition(m_xmf3Position);
+		m_xmf3MovingDirection = Vector3::Normalize(const_cast<XMFLOAT3&> (xmf3Shift));
 		m_pCamera->Move(xmf3Shift);
 	}
 }
@@ -256,7 +258,7 @@ CAirplanePlayer::CAirplanePlayer(ID3D12Device *pd3dDevice, ID3D12GraphicsCommand
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
 	//플레이어의 위치를 설정한다. 
-	SetPosition(XMFLOAT3(0.0f, 0.0f, -50.0f));
+	SetPosition(XMFLOAT3(0.0f, 0.0f, 10.0f));
 
 
 
@@ -288,6 +290,13 @@ void CAirplanePlayer::OnPrepareRender()
 
 	//비행기 모델을 그리기 전에 x-축으로 90도 회전한다. 
 	XMMATRIX mtxRotate = XMMatrixRotationRollPitchYaw(XMConvertToRadians(90.0f), 0.0f, 0.0f);
+	m_xmf4x4World = Matrix4x4::Multiply(mtxRotate, m_xmf4x4World);
+}
+
+void CAirplanePlayer::OnPostRender()
+{
+	//비행기 모델을 그린 후에 x-축으로 -90도 회전한다. 
+	XMMATRIX mtxRotate = XMMatrixRotationRollPitchYaw(XMConvertToRadians(-90.0f), 0.0f, 0.0f);
 	m_xmf4x4World = Matrix4x4::Multiply(mtxRotate, m_xmf4x4World);
 }
 

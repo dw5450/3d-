@@ -57,6 +57,7 @@ void CGameObject::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pC
 	}
 
 	if (m_pMesh) m_pMesh->Render(pd3dCommandList);
+	OnPostRender();
 }
 
 void CGameObject::ReleaseUploadBuffers()
@@ -250,6 +251,7 @@ void CWallsObject::Animate(float fElapsedTime)
 	{
 		m_pMesh->m_xmAABB.Transform(m_xmAABB, XMLoadFloat4x4(&m_xmf4x4World));
 	}
+	//CGameObject::Animate(fElapsedTime);
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////

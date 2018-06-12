@@ -60,6 +60,7 @@ public:
 public:
 	virtual void Animate(float fTimeElapsed);
 	virtual void OnPrepareRender() { }
+	virtual void OnPostRender() { }
 	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera = NULL);
 
 	virtual void ReleaseUploadBuffers();

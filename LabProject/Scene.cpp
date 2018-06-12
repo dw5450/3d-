@@ -30,7 +30,6 @@ void CScene::BuildObjects()
 	pWallCubeMesh->SetAABB(XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(fHalfWidth, fHalfHeight, fHalfDepth));
 
 	m_pWallsObject = new CWallsObject();
-
 	m_pWallsObject->SetPosition(0, 0, WALL_HALF_DEPTH);
 	m_pWallsObject->SetMovingDirection(XMFLOAT3(0, 0, 0));
 	m_pWallsObject->m_fMovingSpeed = 0.0f;
@@ -268,33 +267,6 @@ void CScene::RendUI(HDC hDCFrameBuffer, CCamera *pCamera)
 void CScene::CheckPlayerByWallCollision(float fElapseTime)
 {
 	ContainmentType containType = m_pWallsObject->m_xmAABB.Contains(m_pPlayer->m_xmAABB);					//벽으로 충돌을 체크
-	//switch (containType)
-	//{
-	//case CONTAINS:					//포함될 경우
-	//	break;
-
-	//case INTERSECTS:						//겹칠경우
-	//{
-	//	int nPlaneIndex = -1;
-	//	for (int j = 0; j < 6; j++)
-	//	{
-	//		PlaneIntersectionType intersectType = m_pPlayer->m_xmAABB.Intersects(XMLoadFloat4(&m_pWallsObject->m_pxmf4WallPlanes[j]));
-	//		if (intersectType == INTERSECTING)
-	//		{
-	//			if (j < 4) {
-	//				XMVECTOR moveShift = -XMLoadFloat3(&m_pPlayer->m_xmf3MovingDirection);
-	//				moveShift = moveShift * fElapseTime * m_pPlayer->m_fMovingSpeed;
-	//				XMFLOAT3A result;
-	//				XMStoreFloat3(&result, moveShift);
-
-	//				m_pPlayer->Move(result, false);
-	//			}
-	//			break;
-	//		}
-	//	}
-	//	break;
-	//}
-	//}
 
 	float wall_revise = WALL_HALF_SIZE - 3;
 
@@ -370,31 +342,6 @@ void CScene::CheckPlayerByWallCollision(float fElapseTime)
 			}
 		}
 	}
-
-
-
-
-
-	//if (WALL_HALF_DEPTH< m_pPlayer->GetPosition().z && m_pPlayer->GetPosition().z < 1000.0f - WALL_HALF_DEPTH) {
-	//	if (m_pPlayer->GetPosition().z > m_pWallsObject->GetPosition().z) {
-	//		if (m_pPlayer->m_xmf3MovingDirection.z > 0) {
-	//			m_pWallsObject->SetPosition(XMFLOAT3(0, 0, m_pWallsObject->GetPosition().z + 25));
-	//		}
-	//	}
-	//	else if (m_pPlayer->GetPosition().z < m_pWallsObject->GetPosition().z) {
-	//		if (m_pPlayer->m_xmf3MovingDirection.z < 0) {
-	//			m_pWallsObject->SetPosition(XMFLOAT3(0, 0, m_pWallsObject->GetPosition().z - 25));
-	//		}
-	//	}
-	//}
-
-	//if (m_pPlayer->GetPosition().z < 1000.0f - WALL_HALF_DEPTH) {
-	//	if (m_pPlayer->GetPosition().z > m_pWallsObject->GetPosition().z) {
-	//		if (m_pPlayer->m_xmf3MovingDirection.z > 0) {
-	//			m_pWallsObject->SetPosition(XMFLOAT3(0, 0, m_pWallsObject->GetPosition().z + 25));
-	//		}
-	//	}
-	//}
 }
 
 void CScene::CheckBulletByWallCollision()
