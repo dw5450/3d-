@@ -5,6 +5,7 @@
 #pragma once
 
 #include "Shader.h"
+#include "Player.h"
 
 class CScene
 {
@@ -27,10 +28,35 @@ public:
 
 	void ReleaseUploadBuffers();
 
+private:			//매쉬
+	CMesh * m_pWallMesh;
+	CMesh * m_pNomalEnermyMesh;
+
+private:			//쉐이더
+	CObjectsShader * m_pObjectShader;
+	CWallObjectShader * m_pWallShader;
+
+
+public:
+	CPlayer * m_pPlayer = nullptr;
 protected:
-	CPlayer * m_pPlayer = NULL;
 	CWallsObject * m_pWallsObject = NULL;
 	std::list<CEnermy *>				m_listpEnermys;
+	CBoss		* m_pBoss;
 	ID3D12RootSignature			*m_pd3dGraphicsRootSignature = NULL;
+
+public:		//responEnermy
+	float				m_fEnermyResponInitTime = ENERMYRESPONTIME;
+	float				m_fEnermyResponTime = ENERMYRESPONTIME;
+	size_t				m_iResponCnt = 0;
+	void ResponEnermy(float fElapsedTime);
+
+public :	//충돌체크
+	void CheckPlayerByWallCollision(float fElapseTime);
+	void CheckBulletByWallCollision();
+	void CheckEnermyByWallCollision();
+	void CheckEnermyByBulletCollisions();
+	void CheckPlayerByBulletCollisions();
+	void CheckBossByBulletCollisions();
 
 };

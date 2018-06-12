@@ -23,6 +23,7 @@
 #include <fstream>
 #include <vector>
 #include <list>
+#include <random>
 using namespace std;
 
 #include <d3d12.h>
@@ -52,6 +53,10 @@ using Microsoft::WRL::ComPtr;
 #define DIR_UP					0x10
 #define DIR_DOWN				0x20
 
+#define WALL_HALF_SIZE			50.0f
+
+#define ENERMYRESPONTIME		1.0f
+#define ENERMYSPEED					10.0f
 //#define _WITH_TEXT_MESH
 
 #define _WITH_DIERECTX_MATH_FRUSTUM

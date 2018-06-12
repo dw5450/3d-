@@ -38,6 +38,10 @@ protected:
 	UINT m_nOffset = 0;
 
 public:
+	BoundingBox m_xmAABB;
+	void SetAABB(XMFLOAT3& xmCenter, XMFLOAT3& xmExtents) { m_xmAABB = BoundingBox(xmCenter, xmExtents); }
+
+public:
 	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList);
 };
 
@@ -112,7 +116,7 @@ public:
 	virtual ~CWallCubeMesh();
 };
 
-//
+
 //class CWallMesh : public CMesh
 //{
 //public:

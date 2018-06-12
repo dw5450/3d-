@@ -38,10 +38,10 @@ void CGameObject::Animate(float fTimeElapsed)
 		if (m_fRotationSpeed != 0.0f) Rotate(&m_xmf3RotationAxis, m_fRotationSpeed * fTimeElapsed);
 		if (m_fMovingSpeed != 0.0f) Move(m_xmf3MovingDirection, m_fMovingSpeed * fTimeElapsed);
 
-		/*if (m_pMesh)
+		if (m_pMesh)
 		{
 			m_pMesh->m_xmAABB.Transform(m_xmAABB, XMLoadFloat4x4(&m_xmf4x4World));
-		}*/
+		}
 	}
 }
 
@@ -122,6 +122,7 @@ void CGameObject::MoveForward(float fDistance)
 
 void CGameObject::Move(XMFLOAT3 & vDirection, float fSpeed)
 {
+	SetPosition(m_xmf4x4World._41 + vDirection.x * fSpeed, m_xmf4x4World._42 + vDirection.y * fSpeed, m_xmf4x4World._43 + vDirection.z * fSpeed);
 }
 
 void CGameObject::Rotate(float fPitch, float fYaw, float fRoll)
@@ -247,7 +248,68 @@ void CWallsObject::Animate(float fElapsedTime)
 {
 	if (m_pMesh && m_bActive)
 	{
-		//m_pMesh->m_xmAABB.Transform(m_xmAABB, XMLoadFloat4x4(&m_xmf4x4World));
+		m_pMesh->m_xmAABB.Transform(m_xmAABB, XMLoadFloat4x4(&m_xmf4x4World));
+	}
+}
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+CBullet::CBullet()
+{
+
+}
+
+CBullet::~CBullet()
+{
+
+}
+
+void CBullet::Animate(float fElapsedTime)
+{
+	if (m_bActive) {
+		if (m_fShootingRange < 0)
+			m_bActive = false;
+
+		CGameObject::Animate(fElapsedTime);
+		m_fShootingRange -= fElapsedTime * m_fMovingSpeed;
+	}
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void CBoss::Animate(float fElapseTime)
+{
+	if (m_bActive) {
+		CExplosiveObject::Animate(fElapseTime);
+		m_fBulletCooltime -= fElapseTime;
+
+		if (m_iLife == 0)
+			m_bBlowingUp = true;
 
 	}
+}
+
+bool CBoss::CanShot()
+{
+	if (m_fBulletCooltime < 0) {
+		m_fBulletCooltime = m_fBulletInitCooltime;
+		m_bShotBullet = false;
+		return true;
+	}
+
+	return false;
+}
+
+CBullet * CBoss::ShotBullet()
+{
+	//CCubeMesh *pObjectCubeMesh = new CCubeMesh(1.0f, 1.0f, 1.0f);
+	CBullet * pBullet = new CBullet;
+	//pBullet->SetMesh(pObjectCubeMesh);
+	//pBullet->SetColor(RGB(255, 0, 0));
+	pBullet->SetMovingSpeed(60);
+	pBullet->SetRotationSpeed(600.0f);
+	pBullet->SetPosition(Vector3::Add(GetPosition(), m_xmf3MovingDirection, 12.1f));
+	pBullet->SetMovingDirection(m_xmf3MovingDirection);
+	pBullet->SetRotationAxis(m_xmf3MovingDirection);
+	return pBullet;
+
 }

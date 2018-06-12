@@ -526,7 +526,7 @@ void CScene::BlowUpEnermy(float fElapseTime, float fBombDistance)
 		}
 	}
 
-
+	
 }
 
 void CScene::ResponObject(float fElapsedTime)
