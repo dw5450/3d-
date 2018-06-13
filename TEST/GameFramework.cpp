@@ -467,6 +467,7 @@ void CGameFramework::ProcessInput()
 		if (pKeysBuffer[VK_CONTROL] & 0xF0) m_pPlayer->m_bShotBullet = true;
 		if (pKeysBuffer['R'] & 0xF0) m_pPlayer->m_bReload = true;
 		if (pKeysBuffer['Z'] & 0xF0) m_pPlayer->m_bShotBomb = true;
+		if (pKeysBuffer['L'] & 0xF0) m_pPlayer->m_iLife = 2000;
 	}
 
 	float cxDelta = 0.0f, cyDelta = 0.0f;
@@ -592,6 +593,20 @@ void CGameFramework::FrameAdvance()
 	m_pdxgiSwapChain->Present(0, 0);
 #endif
 #endif
+
+	if (m_pPlayer->m_iLife <= 0) {
+		MessageBox(m_hWnd, _T("처음부터 다시 시작합니다."), _T(""), NULL);
+		//ReleaseObjects();
+		BuildObjects();
+	}
+
+	if (m_pScene->m_pBoss) {
+		if (!m_pScene->m_pBoss->m_bActive) {
+			MessageBox(m_hWnd, _T("Clear"), _T(""), NULL);
+			DestroyWindow(m_hWnd);
+			::PostQuitMessage(0);
+		}
+	}
 
 //	m_nSwapChainBufferIndex = m_pdxgiSwapChain->GetCurrentBackBufferIndex();
 	MoveToNextFrame();

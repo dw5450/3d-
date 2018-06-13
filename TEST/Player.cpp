@@ -358,14 +358,16 @@ CAirplanePlayer::CAirplanePlayer(ID3D12Device *pd3dDevice, ID3D12GraphicsCommand
 	*pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature)
 {
 	//비행기 메쉬를 생성한다. 
-	CMesh *pAirplaneMesh = new CAirplaneMeshDiffused(pd3dDevice, pd3dCommandList, 6.0f, 6.0f, 1.0f, XMFLOAT4(0.0f, 0.5f, 0.0f, 0.0f));
+	pNomalAirplaneMesh = new CAirplaneMeshDiffused(pd3dDevice, pd3dCommandList, 6.0f, 6.0f, 1.0f, XMFLOAT4(0.0f, 0.0f, 0.5f, 0.0f));
+	pWarnningAirplaneMesh = new CAirplaneMeshDiffused(pd3dDevice, pd3dCommandList, 6.0f, 6.0f, 1.0f, XMFLOAT4(0.5f, 0.0f, 0.0f, 0.0f));
+
 
 	m_pBulletMesh = new CCubeMesh(pd3dDevice, pd3dCommandList, 1.0f, 1.0f, 1.0f, XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f));
 	m_pBulletShader = new CObjectsShader();
 	m_pBulletShader->CreateShader(pd3dDevice, pd3dGraphicsRootSignature);
 	m_pBulletShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
-	SetMesh(pAirplaneMesh);
+	SetMesh(pNomalAirplaneMesh);
 
 	//플레이어의 카메라를 스페이스쉽 카메라로 변경(생성)한다. 
 	m_pCamera = ChangeCamera(THIRD_PERSON_CAMERA, 0.0f);
@@ -406,6 +408,26 @@ void CAirplanePlayer::OnPrepareRender()
 	//비행기 모델을 그리기 전에 x-축으로 90도 회전한다. 
 	XMMATRIX mtxRotate = XMMatrixRotationRollPitchYaw(XMConvertToRadians(90.0f), 0.0f, 0.0f);
 	m_xmf4x4World = Matrix4x4::Multiply(mtxRotate, m_xmf4x4World);
+}
+
+void CAirplanePlayer::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera)
+{
+	OnPrepareRender();
+
+	if (m_pShader)
+	{
+		m_pShader->Render(pd3dCommandList, pCamera);
+		m_pShader->UpdateShaderVariable(pd3dCommandList, &m_xmf4x4World);
+
+	}
+
+	if (m_bWarnnig) {
+		if(pWarnningAirplaneMesh) pWarnningAirplaneMesh->Render(pd3dCommandList);
+	}
+	else {
+		if (pNomalAirplaneMesh) pNomalAirplaneMesh->Render(pd3dCommandList);
+	}
+	OnPostRender();
 }
 
 void CAirplanePlayer::OnPostRender()

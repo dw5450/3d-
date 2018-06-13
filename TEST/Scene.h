@@ -49,11 +49,11 @@ private:			//쉐이더
 
 public:
 	CPlayer * m_pPlayer = nullptr;
+	CBoss	* m_pBoss = nullptr;
 protected:
 	std::list<CBullet *>			m_plBullets;
 	CWallsObject * m_pWallsObject = NULL;
 	std::list<CEnermy *>				m_listpEnermys;
-	CBoss		* m_pBoss;
 	ID3D12RootSignature			*m_pd3dGraphicsRootSignature = NULL;
 
 public:		//responEnermy
@@ -66,9 +66,18 @@ public :	//충돌체크
 	void CheckPlayerByWallCollision(float fElapseTime);
 	void CheckBulletByWallCollision();
 	void CheckEnermyByWallCollision();
+	void CheckPlayerByEnermyCollisions();
 	void CheckEnermyByBulletCollisions();
 	void CheckPlayerByBulletCollisions();
 	void CheckBossByBulletCollisions();
+
+
+	float bBomb = false;
+	float fBombElapseTime = 0;
+	float fBombSpeed = 125.0f;
+	XMFLOAT3 xmf3BombPosition;
+	void BlowUpEnermy(float fElapseTime, float fBombDistance);
+
 
 public :  //Remove
 	void RemoveBullet();

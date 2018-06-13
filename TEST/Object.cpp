@@ -57,7 +57,7 @@ void CGameObject::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pC
 	}
 
 	if (m_pMesh) m_pMesh->Render(pd3dCommandList);
-	OnPostRender();
+	//OnPostRender();
 }
 
 void CGameObject::ReleaseUploadBuffers()
@@ -290,6 +290,43 @@ void CBoss::Animate(float fElapseTime)
 	}
 }
 
+void CBoss::Render(ID3D12GraphicsCommandList * pd3dCommandList, CCamera * pCamera)
+{
+	if (m_bActive) {
+		if (m_bBlowingUp)
+		{
+			for (int i = 0; i < 100 ; i++)
+			{
+				if (m_pExplosionMesh)
+				{
+					if (m_pShader)
+					{
+						m_pShader->Render(pd3dCommandList, pCamera);
+						m_pShader->UpdateShaderVariable(pd3dCommandList, &m_pxmf4x4Transforms[i]);
+					}
+
+					if (m_pExplosionMesh) m_pExplosionMesh->Render(pd3dCommandList);
+				}
+			}
+		}
+		else
+		{
+			CGameObject::Render(pd3dCommandList, pCamera);
+		}
+	}
+}
+
+void CBoss::SetExplosionMesh(CMesh * agrMesh)
+{
+	m_pExplosionMesh = agrMesh;
+}
+
+void CBoss::SetBulletInfo(CMesh * agrMesh, CShader * pShader)
+{
+	m_pBulletMesh = agrMesh;
+	m_pBulletShader = pShader;
+}
+
 bool CBoss::CanShot()
 {
 	if (m_fBulletCooltime < 0) {
@@ -305,8 +342,8 @@ CBullet * CBoss::ShotBullet()
 {
 	//CCubeMesh *pObjectCubeMesh = new CCubeMesh(1.0f, 1.0f, 1.0f);
 	CBullet * pBullet = new CBullet;
-	//pBullet->SetMesh(pObjectCubeMesh);
-	//pBullet->SetColor(RGB(255, 0, 0));
+	if(m_pBulletMesh) pBullet->SetMesh(m_pBulletMesh);
+	if (m_pBulletShader) pBullet->SetShader(m_pBulletShader);
 	pBullet->SetMovingSpeed(60);
 	pBullet->SetRotationSpeed(600.0f);
 	pBullet->SetPosition(Vector3::Add(GetPosition(), m_xmf3MovingDirection, 12.1f));

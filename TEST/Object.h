@@ -60,7 +60,6 @@ public:
 public:
 	virtual void Animate(float fTimeElapsed);
 	virtual void OnPrepareRender() { }
-	virtual void OnPostRender() { }
 	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera = NULL);
 
 	virtual void ReleaseUploadBuffers();
@@ -133,6 +132,7 @@ public:
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 class CEnermy : public CExplosiveObject
 {
+	
 public:
 	CEnermy() {};
 	virtual ~CEnermy() {};
@@ -146,10 +146,18 @@ public:
 
 class CBoss : public CEnermy
 {
+private:
+	CMesh * m_pExplosionMesh = NULL;
+	CMesh * m_pBulletMesh = nullptr;
+	CShader * m_pBulletShader = nullptr;
 public:
-	CBoss() {};
+	CBoss() { m_fDuration = 2.2f; };
 	virtual ~CBoss() {};
 	virtual void Animate(float fElapseTime);
+	void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera);
+
+	void SetExplosionMesh(CMesh *);
+	void SetBulletInfo(CMesh *, CShader * );
 
 public:
 

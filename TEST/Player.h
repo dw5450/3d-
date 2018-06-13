@@ -35,6 +35,7 @@ protected:
 
 	CCamera						*m_pCamera = NULL;
 
+
 public:
 	CPlayer();
 	virtual ~CPlayer();
@@ -85,6 +86,10 @@ public:
 	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera = NULL);
 
 public:		//skill
+	size_t						m_iLife = 1;
+
+	bool						m_bWarnnig = false;
+
 	bool					m_bShotBullet = false;
 	float					m_fBulletCooltime = BULLETCOOLTIME;
 	float					m_fBulletInitCooltime = BULLETCOOLTIME;
@@ -110,14 +115,17 @@ public:		//skill
 
 class CAirplanePlayer : public CPlayer
 {
-
+private:
+	CMesh * pNomalAirplaneMesh;
+	CMesh * pWarnningAirplaneMesh;
 public:
 	CAirplanePlayer(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature);
 	virtual ~CAirplanePlayer();
 
 	virtual CCamera *ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed);
 	virtual void OnPrepareRender();
-	virtual void OnPostRender();
+	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera);
+	void OnPostRender();
 
 
 };

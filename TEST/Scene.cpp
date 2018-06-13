@@ -24,8 +24,12 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	m_pNomalEnermyMesh = new CVariousColorsCubeMesh(pd3dDevice, pd3dCommandList, 2.0f, 2.0f, 2.0f);
 	m_pNomalEnermyMesh->SetAABB(XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 1.0f, 1.0f));
 	
-	CVariousColorsCubeMesh * m_BossMesh = new CVariousColorsCubeMesh(pd3dDevice, pd3dCommandList, 20.0f, 20.0f, 20.0f);
-	m_BossMesh->SetAABB(XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(10.0f, 10.0f, 10.0f));
+	CVariousColorsCubeMesh * m_BossMesh = new CVariousColorsCubeMesh(pd3dDevice, pd3dCommandList, 8.0f, 8.0f, 8.0f);
+	m_BossMesh->SetAABB(XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(8.0f, 8.0f, 8.0f));
+
+	CVariousColorsCubeMesh * m_BossExplosionMesh = new CVariousColorsCubeMesh(pd3dDevice, pd3dCommandList, 2.0f, 2.0f, 2.0f);
+	CCubeMesh * m_BossBulletMesh = new CCubeMesh(pd3dDevice, pd3dCommandList, 1.0f, 1.0f, 1.0f, XMFLOAT4(0.8f, 0.0f, 0.0f, 1.0f));
+
 
 	//쉐이더 설정
 	m_pObjectShader = new CObjectsShader();
@@ -54,9 +58,17 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	//보스 생성
 	m_pBoss = new CBoss();
 	m_pBoss->SetMesh(m_BossMesh);
-	if (m_pObjectShader) m_pBoss->SetShader(m_pObjectShader);
+	m_pBoss->SetExplosionMesh(m_BossExplosionMesh);
+	if (m_pObjectShader) {
+		m_pBoss->SetShader(m_pObjectShader);
+
+		if (m_BossBulletMesh)
+			m_pBoss->SetBulletInfo(m_BossBulletMesh, m_pObjectShader);
+
+	}
 	m_pBoss->SetPosition(XMFLOAT3(0.0f, 0.0f, 980.0f));
 	m_pBoss->SetMovingDirection(XMFLOAT3(0, 0, 0));
+	m_pBoss->SetMovingSpeed(10.0f);
 	m_pBoss->SetRotationAxis(XMFLOAT3(0, 1, 0));
 	m_pBoss->SetRotationSpeed(120);
 
@@ -262,6 +274,34 @@ void CScene::CheckEnermyByWallCollision()
 	}
 }
 
+void CScene::CheckPlayerByEnermyCollisions()
+{
+	bool isEnermyBackPlayer = false;
+	auto itor = m_listpEnermys.begin();
+
+	for (auto & pEnermy : m_listpEnermys)
+	{
+		XMFLOAT3 ToEnermy = Vector3::Subtract(pEnermy->GetPosition(), m_pPlayer->GetPosition());
+		if (!isEnermyBackPlayer) {
+			if (Vector3::DotProduct(ToEnermy, m_pPlayer->GetLook()) < 0)
+				isEnermyBackPlayer = true;
+		}
+
+		if (m_pPlayer->m_xmAABB.Intersects(pEnermy->m_xmAABB)) {
+			if (!pEnermy->m_bBlowingUp) {
+				pEnermy->m_bActive = false;
+				m_pPlayer->m_iLife--;
+			}
+		}
+	}
+	if (isEnermyBackPlayer) {
+		m_pPlayer->m_bWarnnig = true;
+	}
+	else
+		m_pPlayer->m_bWarnnig = false;
+		
+}
+
 void CScene::CheckEnermyByBulletCollisions()
 {
 	for (auto & Enermy : m_listpEnermys) {
@@ -280,6 +320,51 @@ void CScene::CheckPlayerByBulletCollisions()
 
 void CScene::CheckBossByBulletCollisions()
 {
+	if (m_pBoss) {
+		for (auto & pBullets : m_plBullets)
+		{
+			if (m_pBoss->m_xmAABB.Intersects(pBullets->m_xmAABB)) {
+				pBullets->m_bActive = false;
+				m_pBoss->m_iLife--;
+			}
+		}
+	}
+
+	if (m_pBoss->m_iLife <= 0) {
+		m_pBoss->m_bBlowingUp;
+	}
+}
+
+void CScene::BlowUpEnermy(float fElapseTime, float fBombDistance)
+{
+	static bool collision_boss = false;
+	fBombElapseTime += fElapseTime;
+
+	float distance = fBombElapseTime * fBombSpeed;
+
+	if (distance > fBombDistance) {
+		fBombElapseTime = 0;
+		bBomb = false;
+		collision_boss = false;
+		return;
+	}
+
+	XMFLOAT3 extents(distance, distance, distance);
+
+	BoundingBox bb(xmf3BombPosition, extents);
+	for (auto & data : m_listpEnermys) {
+		ContainmentType containType = data->m_xmAABB.Contains(bb);					//벽으로 충돌을 체크
+		if (containType == INTERSECTING)
+			data->m_bBlowingUp = true;
+	}
+
+	if (m_pBoss) {
+		ContainmentType containType = m_pBoss->m_xmAABB.Contains(bb);					//벽으로 충돌을 체크
+		if (containType == INTERSECTING && !collision_boss) {
+			collision_boss = true;
+			m_pBoss->m_iLife -= 5;
+		}
+	}
 
 }
 
@@ -320,26 +405,45 @@ void CScene::AnimateObjects(float fTimeElapsed)
 		m_plBullets.emplace_back(m_pPlayer->ShotBullet());
 	}
 
+	//목표를 포착했다!
+	m_pBoss->TraceObject(m_pPlayer);
 
 	//애니메이트
-	if (m_pPlayer) m_pPlayer->Animate(fTimeElapsed);
+	if (m_pPlayer)
+		m_pPlayer->Animate(fTimeElapsed);
 
 	if (m_pWallsObject) m_pWallsObject->Animate(fTimeElapsed);
+
+	for (auto & data : m_listpEnermys) {
+		if (data) {
+			data->Animate(fTimeElapsed);
+			if (data->m_fElapseTime > 3.0)
+				data->TraceObject(m_pPlayer);
+		}
+	}
+	
+	if (m_pBoss)
+	{
+		m_pBoss->Animate(fTimeElapsed);
+		if (m_pBoss->CanShot()) {
+			m_plBullets.emplace_back(m_pBoss->ShotBullet());
+		}
+	}
 
 	for (auto & data : m_plBullets)
 		data->Animate(fTimeElapsed);
 
-	for (auto & data : m_listpEnermys)
-		if (data) data->Animate(fTimeElapsed);
-	
-	if (m_pBoss) m_pBoss->Animate(fTimeElapsed);
-
+	if (bBomb) {
+		BlowUpEnermy(fTimeElapsed, 50.0f);
+	}
 
 	//충돌체크를 진행한다.
 	CheckPlayerByWallCollision(fTimeElapsed);
 	CheckEnermyByWallCollision();
 	CheckBulletByWallCollision();
 	CheckEnermyByBulletCollisions();
+	CheckPlayerByEnermyCollisions();
+	CheckBossByBulletCollisions();
 
 	RemoveBullet();
 	RemoveEnermy();
