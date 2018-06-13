@@ -373,7 +373,7 @@ CAirplanePlayer::CAirplanePlayer(ID3D12Device *pd3dDevice, ID3D12GraphicsCommand
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
 	//플레이어의 위치를 설정한다. 
-	SetPosition(XMFLOAT3(0.0f, 0.0f, 10.0f));
+	SetPosition(XMFLOAT3(0.0f, 0.0f, 25.0f));
 
 
 

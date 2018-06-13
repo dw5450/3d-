@@ -37,6 +37,12 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	m_pWallShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
 
+	//폭발 준비
+
+	CExplosiveObject::PrepareExplosion(pd3dDevice, pd3dCommandList);
+
+
+
 	//벽을 만들어보자
 	m_pWallsObject = new CWallsObject();
 	m_pWallsObject->SetPosition(0.0f, 0.0f, 125.0f);
@@ -199,7 +205,7 @@ void CScene::CheckPlayerByWallCollision(float fElapseTime)
 	//XMMATRIX mtxRotate = XMMatrixRotationRollPitchYaw(XMConvertToRadians(-90.0f), 0.0f, 0.0f);
 	//XMFLOAT3 MoveDirection = Vector3::TransformCoord(m_pPlayer->m_xmf3MovingDirection, mtxRotate);
 
-	XMFLOAT3 & MoveDirection = m_pPlayer->m_xmf3MovingDirection;
+	const XMFLOAT3 & MoveDirection = m_pPlayer->m_xmf3MovingDirection;
 	if (m_pPlayer->GetLook().z > 0) {				//플레이어가 앞을 바라 볼 경우
 		if (m_pPlayer->GetPosition().z > 750)
 			m_pWallsObject->SetPosition(0, 0, 850.0f);
@@ -237,6 +243,14 @@ void CScene::CheckPlayerByWallCollision(float fElapseTime)
 
 void CScene::CheckBulletByWallCollision()
 {
+	auto m_plBullets_itor = m_plBullets.begin();
+	for (;m_plBullets_itor != m_plBullets.end();) {
+		CGameObject* bullet = *m_plBullets_itor;
+		if (!bullet->m_xmAABB.Intersects(m_pWallsObject->m_xmAABB)) {
+			m_plBullets_itor = m_plBullets.erase(m_plBullets_itor);
+		}
+		else ++m_plBullets_itor;
+	}
 }
 
 void CScene::CheckEnermyByWallCollision()
@@ -250,6 +264,14 @@ void CScene::CheckEnermyByWallCollision()
 
 void CScene::CheckEnermyByBulletCollisions()
 {
+	for (auto & Enermy : m_listpEnermys) {
+		for (auto & pBullet : m_plBullets) {
+			if (pBullet->m_xmAABB.Intersects(Enermy->m_xmAABB) && !Enermy->m_bBlowingUp) {
+				Enermy->m_bBlowingUp = true;
+				pBullet->m_bActive = false;
+			}
+		}
+	}
 }
 
 void CScene::CheckPlayerByBulletCollisions()
@@ -258,6 +280,17 @@ void CScene::CheckPlayerByBulletCollisions()
 
 void CScene::CheckBossByBulletCollisions()
 {
+
+}
+
+void CScene::RemoveBullet()
+{
+	RemoveObjects(m_plBullets);
+}
+
+void CScene::RemoveEnermy()
+{
+	RemoveObjects(m_listpEnermys);
 }
 
 bool CScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
@@ -287,12 +320,8 @@ void CScene::AnimateObjects(float fTimeElapsed)
 		m_plBullets.emplace_back(m_pPlayer->ShotBullet());
 	}
 
-	//충돌체크를 진행한다.
-	CheckPlayerByWallCollision(fTimeElapsed);
-	CheckEnermyByWallCollision();
 
-	//애니메이트를 실행한다
-
+	//애니메이트
 	if (m_pPlayer) m_pPlayer->Animate(fTimeElapsed);
 
 	if (m_pWallsObject) m_pWallsObject->Animate(fTimeElapsed);
@@ -304,6 +333,18 @@ void CScene::AnimateObjects(float fTimeElapsed)
 		if (data) data->Animate(fTimeElapsed);
 	
 	if (m_pBoss) m_pBoss->Animate(fTimeElapsed);
+
+
+	//충돌체크를 진행한다.
+	CheckPlayerByWallCollision(fTimeElapsed);
+	CheckEnermyByWallCollision();
+	CheckBulletByWallCollision();
+	CheckEnermyByBulletCollisions();
+
+	RemoveBullet();
+	RemoveEnermy();
+
+
 }
 
 void CScene::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera)

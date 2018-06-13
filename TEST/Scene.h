@@ -4,6 +4,16 @@
 
 #pragma once
 
+#define RemoveObjects(pObjectList) \
+	auto  Itor = pObjectList.begin(); \
+	for (;Itor != pObjectList.end();) {\
+		CGameObject * object =  *Itor; \
+	if (!object->m_bActive ){\
+		Itor = pObjectList.erase(Itor);\
+	}\
+	else ++Itor;\
+	}
+
 #include "Shader.h"
 #include "Player.h"
 
@@ -60,4 +70,7 @@ public :	//충돌체크
 	void CheckPlayerByBulletCollisions();
 	void CheckBossByBulletCollisions();
 
+public :  //Remove
+	void RemoveBullet();
+	void RemoveEnermy();
 };

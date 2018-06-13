@@ -148,7 +148,7 @@ inline float RandF(float fMin, float fMax)
 XMVECTOR RandomUnitVectorOnSphere()
 {
 	XMVECTOR xmvOne = XMVectorSet(1.0f, 1.0f, 1.0f, 1.0f);
-	XMVECTOR xmvZero = XMVectorZero();
+	//XMVECTOR xmvZero = XMVectorZero();
 
 	while (true)
 	{
@@ -174,7 +174,7 @@ void CExplosiveObject::PrepareExplosion(ID3D12Device *pd3dDevice, ID3D12Graphics
 {
 	for (int i = 0; i < EXPLOSION_DEBRISES; i++) XMStoreFloat3(&m_pxmf3SphereVectors[i], ::RandomUnitVectorOnSphere());
 
-	m_pExplosionMesh = new CCubeMesh(pd3dDevice, pd3dCommandList, 0.5f, 0.5f, 0.5f);
+	m_pExplosionMesh = new CVariousColorsCubeMesh(pd3dDevice, pd3dCommandList, 0.5f, 0.5f, 0.5f);
 }
 
 void CExplosiveObject::Animate(float fElapsedTime)
