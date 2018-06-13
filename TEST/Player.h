@@ -106,9 +106,11 @@ public:		//skill
 
 	float					m_fBombCooltime = 1.0f;
 	float					m_fBombInitCooltime = 1.0f;
-	unsigned int m_iBombNum = 0;
+	float m_fBombDistance = 125.0f;
+	unsigned int m_iBombNum = 10;
 	bool m_bShotBomb = false;
 	bool ShotBomb();
+
 };
 
 

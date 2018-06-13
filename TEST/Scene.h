@@ -41,6 +41,7 @@ public:
 private:			//∏≈Ω¨
 	CMesh * m_pWallMesh;
 	CMesh * m_pNomalEnermyMesh;
+	CMesh * m_pRedEnermyMesh;
 
 private:			//Ω¶¿Ã¥ı
 	CObjectsShader * m_pObjectShader;

@@ -23,9 +23,12 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	
 	m_pNomalEnermyMesh = new CVariousColorsCubeMesh(pd3dDevice, pd3dCommandList, 2.0f, 2.0f, 2.0f);
 	m_pNomalEnermyMesh->SetAABB(XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 1.0f, 1.0f));
-	
+	m_pRedEnermyMesh = new CCubeMesh(pd3dDevice, pd3dCommandList, 2.0f, 2.0f, 2.0f, XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f));
+	m_pRedEnermyMesh->SetAABB(XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 1.0f, 1.0f));
+
+
 	CVariousColorsCubeMesh * m_BossMesh = new CVariousColorsCubeMesh(pd3dDevice, pd3dCommandList, 8.0f, 8.0f, 8.0f);
-	m_BossMesh->SetAABB(XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(8.0f, 8.0f, 8.0f));
+	m_BossMesh->SetAABB(XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(4.0f, 4.0f, 4.0f));
 
 	CVariousColorsCubeMesh * m_BossExplosionMesh = new CVariousColorsCubeMesh(pd3dDevice, pd3dCommandList, 2.0f, 2.0f, 2.0f);
 	CCubeMesh * m_BossBulletMesh = new CCubeMesh(pd3dDevice, pd3dCommandList, 1.0f, 1.0f, 1.0f, XMFLOAT4(0.8f, 0.0f, 0.0f, 1.0f));
@@ -150,13 +153,15 @@ void CScene::ResponEnermy(float fElapsedTime)
 
 		if (m_fEnermyResponTime < 0) {
 			++m_iResponCnt;
-
+			std::uniform_int_distribution<size_t> randEnermyuid(CEnermy::Blue, CEnermy::Pink);
+			size_t randEnermy = randEnermyuid(dre);
 			if (m_iResponCnt % 10) {
 				m_fEnermyResponTime = m_fEnermyResponInitTime;
 				CEnermy * Enermy = new CEnermy;
 				if (m_pNomalEnermyMesh) Enermy->SetMesh(m_pNomalEnermyMesh);
 				if (m_pObjectShader) Enermy->SetShader(m_pObjectShader);
 				XMFLOAT3 temp_position = XMFLOAT3(ufr(dre), ufr(dre), m_pPlayer->GetPosition().z + 100);
+				Enermy->SetByType(randEnermy);
 				Enermy->SetPosition(temp_position);
 				Enermy->SetMovingDirection(XMFLOAT3(ufr(dre), ufr(dre), ufr(dre)));
 				Enermy->SetMovingSpeed(ENERMYSPEED);
@@ -168,13 +173,19 @@ void CScene::ResponEnermy(float fElapsedTime)
 
 			// 빨간색 적을 만들어보자
 			else {
-				/*CEnermy * Enermy = new CREnermy;
-				Enermy->SetPosition(XMFLOAT3(ufr(dre), ufr(dre), m_pPlayer->GetPosition().z + 100));
+				m_fEnermyResponTime = m_fEnermyResponInitTime;
+				CEnermy * Enermy = new CEnermy;
+				if (m_pRedEnermyMesh) Enermy->SetMesh(m_pRedEnermyMesh);
+				if (m_pObjectShader) Enermy->SetShader(m_pObjectShader);
+				XMFLOAT3 temp_position = XMFLOAT3(ufr(dre), ufr(dre), m_pPlayer->GetPosition().z + 100);
+				Enermy->SetByType(CEnermy::Red);
+				Enermy->SetPosition(temp_position);
 				Enermy->SetMovingDirection(XMFLOAT3(ufr(dre), ufr(dre), ufr(dre)));
+				Enermy->SetMovingSpeed(ENERMYSPEED);
 				Enermy->SetRotationAxis(XMFLOAT3(ufrRotaionAngle(dre), ufrRotaionAngle(dre), ufrRotaionAngle(dre)));
 				Enermy->SetRotationSpeed(120);
 
-				m_plEnermys.emplace_back(Enermy);*/
+				m_listpEnermys.emplace_back(Enermy);
 				m_fEnermyResponTime = m_fEnermyResponInitTime;
 			}
 			//delete Enermy;
@@ -316,6 +327,13 @@ void CScene::CheckEnermyByBulletCollisions()
 
 void CScene::CheckPlayerByBulletCollisions()
 {
+	for (auto & pBullets : m_plBullets)
+	{
+		if (m_pPlayer->m_xmAABB.Intersects(pBullets->m_xmAABB)) {
+			pBullets->m_bActive = false;
+			m_pPlayer->m_iLife--;
+		}
+	}
 }
 
 void CScene::CheckBossByBulletCollisions()
@@ -375,7 +393,16 @@ void CScene::RemoveBullet()
 
 void CScene::RemoveEnermy()
 {
-	RemoveObjects(m_listpEnermys);
+	auto  Itor = m_listpEnermys.begin();
+	for (;Itor != m_listpEnermys.end();) {
+		CEnermy * object = *Itor;
+		if (!object->m_bActive) {
+			if (object->m_iType == CEnermy::Red)
+				m_pPlayer->m_iBombNum++;
+			Itor = m_listpEnermys.erase(Itor);
+		}
+		else ++Itor;
+	}
 }
 
 bool CScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
@@ -433,10 +460,14 @@ void CScene::AnimateObjects(float fTimeElapsed)
 	for (auto & data : m_plBullets)
 		data->Animate(fTimeElapsed);
 
-	if (bBomb) {
-		BlowUpEnermy(fTimeElapsed, 50.0f);
+	if (m_pPlayer->ShotBomb() && !bBomb) {
+		bBomb = true;
+		xmf3BombPosition = m_pPlayer->GetPosition();
 	}
 
+	if (bBomb) {
+		BlowUpEnermy(fTimeElapsed, m_pPlayer->m_fBombDistance);
+	}
 	//충돌체크를 진행한다.
 	CheckPlayerByWallCollision(fTimeElapsed);
 	CheckEnermyByWallCollision();
@@ -444,6 +475,7 @@ void CScene::AnimateObjects(float fTimeElapsed)
 	CheckEnermyByBulletCollisions();
 	CheckPlayerByEnermyCollisions();
 	CheckBossByBulletCollisions();
+	CheckPlayerByBulletCollisions();
 
 	RemoveBullet();
 	RemoveEnermy();

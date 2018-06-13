@@ -132,10 +132,19 @@ public:
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 class CEnermy : public CExplosiveObject
 {
-	
+public:
+	enum {
+		Red = 1,
+		Blue = 2,
+		Green = 3,
+		Pink = 4
+	};
 public:
 	CEnermy() {};
 	virtual ~CEnermy() {};
+
+	size_t m_iType = Blue;
+	void SetByType(size_t Type);
 
 public:
 	void TraceObject(CGameObject *);
@@ -161,7 +170,7 @@ public:
 
 public:
 
-	size_t m_iLife = 20;
+	size_t m_iLife = 7;
 
 	float m_fBulletCooltime = 0.5f;
 	float m_fBulletInitCooltime = 0.5f;

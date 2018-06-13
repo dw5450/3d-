@@ -231,6 +231,33 @@ void CExplosiveObject::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamer
 	}
 }
 
+void CEnermy::SetByType(size_t Type)
+{
+	m_iType = Type;
+	switch (m_iType)
+	{
+	case Red:
+		SetMovingSpeed(50);
+		break;
+
+	case Blue:
+		SetMovingSpeed(10);
+		break;
+
+	case Green:
+		SetMovingSpeed(20);
+		break;
+
+	case Pink:
+		SetMovingSpeed(30);
+		break;
+
+	default:
+		break;
+	}
+
+}
+
 void CEnermy::TraceObject(CGameObject * pObejct)
 {
 	XMVECTOR movingDirection = XMVector3Normalize(XMVectorSubtract(XMLoadFloat3(&pObejct->GetPosition()), XMLoadFloat3(&GetPosition())));
