@@ -62,7 +62,6 @@ void CScene::Animate(float fElapsedTime)
 		if (m_pBoss->CanShot())	m_plBullets.emplace_back(m_pBoss->ShotBullet());
 	}
 
-
 	for (std::shared_ptr<CBullet> & data : m_plBullets)
 		data->Animate(fElapsedTime);
 

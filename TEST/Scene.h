@@ -40,6 +40,7 @@ private:			//Ω¶¿Ã¥ı
 public:
 	CPlayer * m_pPlayer = nullptr;
 protected:
+	std::list<CBullet *>			m_plBullets;
 	CWallsObject * m_pWallsObject = NULL;
 	std::list<CEnermy *>				m_listpEnermys;
 	CBoss		* m_pBoss;

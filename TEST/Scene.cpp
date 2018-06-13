@@ -281,18 +281,28 @@ void CScene::AnimateObjects(float fTimeElapsed)
 	ResponEnermy(fTimeElapsed);
 
 
+	//플레이어가 총알을 쏜다.
+	
+	if (m_pPlayer->CanShot()){
+		m_plBullets.emplace_back(m_pPlayer->ShotBullet());
+	}
+
 	//충돌체크를 진행한다.
 	CheckPlayerByWallCollision(fTimeElapsed);
 	CheckEnermyByWallCollision();
 
+	//애니메이트를 실행한다
+
+	if (m_pPlayer) m_pPlayer->Animate(fTimeElapsed);
 
 	if (m_pWallsObject) m_pWallsObject->Animate(fTimeElapsed);
 
-	if (m_listpEnermys.size() > 0) {
-		for (auto & data : m_listpEnermys)
-			if (data) data->Animate(fTimeElapsed);
-	}
+	for (auto & data : m_plBullets)
+		data->Animate(fTimeElapsed);
 
+	for (auto & data : m_listpEnermys)
+		if (data) data->Animate(fTimeElapsed);
+	
 	if (m_pBoss) m_pBoss->Animate(fTimeElapsed);
 }
 
@@ -303,13 +313,13 @@ void CScene::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera
 	pCamera->UpdateShaderVariables(pd3dCommandList);
 
 	//벽그리기
+	if(m_pWallsObject) m_pWallsObject->Render(pd3dCommandList, pCamera);
 
-	m_pWallsObject->Render(pd3dCommandList, pCamera);
-
-	if (m_listpEnermys.size() > 0) {
-		for (auto & data : m_listpEnermys)
-			if (data) data->Render(pd3dCommandList, pCamera);
-	}
+	for (auto & data : m_plBullets)
+		if(data) data->Render(pd3dCommandList, pCamera);
+	
+	for (auto & data : m_listpEnermys)
+		if (data) data->Render(pd3dCommandList, pCamera);
 
 	if (m_pBoss) m_pBoss->Render(pd3dCommandList, pCamera);
 

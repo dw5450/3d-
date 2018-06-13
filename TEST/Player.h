@@ -2,10 +2,19 @@
 
 #include "Object.h"
 #include "Camera.h"
+#define MAXBULLETNUM				20
+#define BULLETCOOLTIME				0.3f
+#define BULLETSPEED					120.0f
+#define BULLETLIMITTIME				3.0f
+
+#define RELOADTIME					1.0f
 
 class CPlayer : public CGameObject
 {
 protected:
+	CMesh * m_pBulletMesh = nullptr;
+	CShader * m_pBulletShader = nullptr;
+
 	XMFLOAT3					m_xmf3Position;
 	XMFLOAT3					m_xmf3Right;
 	XMFLOAT3					m_xmf3Up;
@@ -29,6 +38,8 @@ protected:
 public:
 	CPlayer();
 	virtual ~CPlayer();
+
+	virtual void Animate(float fTimeElapsed);
 
 	XMFLOAT3 GetPosition() { return(m_xmf3Position); }
 	XMFLOAT3 GetLookVector() { return(m_xmf3Look); }
@@ -72,10 +83,34 @@ public:
 	virtual CCamera *ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed) { return(NULL); }
 	virtual void OnPrepareRender();
 	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera = NULL);
+
+public:		//skill
+	bool					m_bShotBullet = false;
+	float					m_fBulletCooltime = BULLETCOOLTIME;
+	float					m_fBulletInitCooltime = BULLETCOOLTIME;
+	unsigned int			m_iBulletMaxNum = MAXBULLETNUM;
+	unsigned int			m_iBulletNum = MAXBULLETNUM;
+	bool CanShot();
+	CBullet * ShotBullet();
+
+	bool					m_bReload = false;
+	float					m_bReloadTime = RELOADTIME;
+	float					m_bReloadInitTime = RELOADTIME;
+	void ReloadBullet(float fElapseTime);
+
+
+	float					m_fBombCooltime = 1.0f;
+	float					m_fBombInitCooltime = 1.0f;
+	unsigned int m_iBombNum = 0;
+	bool m_bShotBomb = false;
+	bool ShotBomb();
 };
+
+
 
 class CAirplanePlayer : public CPlayer
 {
+
 public:
 	CAirplanePlayer(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature);
 	virtual ~CAirplanePlayer();
@@ -83,6 +118,8 @@ public:
 	virtual CCamera *ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed);
 	virtual void OnPrepareRender();
 	virtual void OnPostRender();
+
+
 };
 
 

@@ -464,6 +464,9 @@ void CGameFramework::ProcessInput()
 		if (pKeysBuffer['D'] & 0xF0) dwDirection |= DIR_RIGHT;
 		if (pKeysBuffer['Q'] & 0xF0) dwDirection |= DIR_UP;
 		if (pKeysBuffer['E'] & 0xF0) dwDirection |= DIR_DOWN;
+		if (pKeysBuffer[VK_CONTROL] & 0xF0) m_pPlayer->m_bShotBullet = true;
+		if (pKeysBuffer['R'] & 0xF0) m_pPlayer->m_bReload = true;
+		if (pKeysBuffer['Z'] & 0xF0) m_pPlayer->m_bShotBomb = true;
 	}
 
 	float cxDelta = 0.0f, cyDelta = 0.0f;

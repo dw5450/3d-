@@ -30,6 +30,7 @@ CPlayer::CPlayer()
 
 	m_pPlayerUpdatedContext = NULL;
 	m_pCameraUpdatedContext = NULL;
+
 }
 
 CPlayer::~CPlayer()
@@ -37,6 +38,16 @@ CPlayer::~CPlayer()
 	ReleaseShaderVariables();
 
 	if (m_pCamera) delete m_pCamera;
+}
+
+void CPlayer::Animate(float fTimeElapsed)
+{
+	CGameObject::Animate(fTimeElapsed);
+
+	m_fBombCooltime -= fTimeElapsed;
+	m_fBulletCooltime -= fTimeElapsed;
+
+	ReloadBullet(fTimeElapsed);
 }
 
 void CPlayer::CreateShaderVariables(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList)
@@ -240,64 +251,53 @@ void CPlayer::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamer
 	if (nCameraMode == THIRD_PERSON_CAMERA) CGameObject::Render(pd3dCommandList, pCamera);
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// CAirplanePlayer
-
-CAirplanePlayer::CAirplanePlayer(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList
-	*pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature)
+bool CPlayer::CanShot()
 {
-	//비행기 메쉬를 생성한다. 
-	CMesh *pAirplaneMesh = new CAirplaneMeshDiffused(pd3dDevice, pd3dCommandList, 6.0f, 6.0f, 1.0f, XMFLOAT4(0.0f, 0.5f, 0.0f, 0.0f));
+	if (m_bShotBullet && m_iBulletNum > 0 && m_fBulletCooltime < 0) {
+		m_bShotBullet = false;
+		return true;
+	}
 
-	SetMesh(pAirplaneMesh);
-
-	//플레이어의 카메라를 스페이스쉽 카메라로 변경(생성)한다. 
-	m_pCamera = ChangeCamera(THIRD_PERSON_CAMERA, 0.0f);
-
-	//플레이어를 위한 셰이더 변수를 생성한다. 
-	CreateShaderVariables(pd3dDevice, pd3dCommandList);
-
-	//플레이어의 위치를 설정한다. 
-	SetPosition(XMFLOAT3(0.0f, 0.0f, 10.0f));
-
-
-
-	//플레이어(비행기) 메쉬를 렌더링할 때 사용할 셰이더를 생성한다.
-	CPlayerShader *pShader = new CPlayerShader();
-	pShader->CreateShader(pd3dDevice, pd3dGraphicsRootSignature);
-	pShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
-	SetShader(pShader);
+	return false;
 }
 
-CAirplanePlayer::~CAirplanePlayer()
+CBullet * CPlayer::ShotBullet()
 {
+	m_bShotBullet = false;
+	--m_iBulletNum;
+	CBullet * pBullet = new CBullet;
+	if(m_pBulletMesh)pBullet->SetMesh(m_pBulletMesh);
+	if (m_pBulletMesh)pBullet->SetShader(m_pBulletShader);
+	pBullet->SetMovingSpeed(BULLETSPEED);
+	pBullet->SetRotationSpeed(600.0f);
+	pBullet->SetPosition(Vector3::Add(m_xmf3Position, m_xmf3Look, 7));
+	pBullet->SetMovingDirection(m_xmf3Look);
+	pBullet->SetRotationAxis(m_xmf3Look);
+	m_fBulletCooltime = m_fBulletInitCooltime;
+	return pBullet;
 }
 
-void CAirplanePlayer::OnPrepareRender()
+void CPlayer::ReloadBullet(float fElapseTime)
 {
-	m_xmf4x4World._11 = m_xmf3Right.x;
-	m_xmf4x4World._12 = m_xmf3Right.y;
-	m_xmf4x4World._13 = m_xmf3Right.z;
-	m_xmf4x4World._21 = m_xmf3Up.x;
-	m_xmf4x4World._22 = m_xmf3Up.y;
-	m_xmf4x4World._23 = m_xmf3Up.z;
-	m_xmf4x4World._31 = m_xmf3Look.x;
-	m_xmf4x4World._32 = m_xmf3Look.y;
-	m_xmf4x4World._33 = m_xmf3Look.z;
-	m_xmf4x4World._41 = m_xmf3Position.x;
-	m_xmf4x4World._42 = m_xmf3Position.y;
-	m_xmf4x4World._43 = m_xmf3Position.z;
-
-	//비행기 모델을 그리기 전에 x-축으로 90도 회전한다. 
-	XMMATRIX mtxRotate = XMMatrixRotationRollPitchYaw(XMConvertToRadians(90.0f), 0.0f, 0.0f);
-	m_xmf4x4World = Matrix4x4::Multiply(mtxRotate, m_xmf4x4World);
+	if (m_bReload) {
+		m_bReload = false;
+		m_iBulletNum = m_iBulletMaxNum;
+	}
 }
 
-void CAirplanePlayer::OnPostRender()
+
+bool CPlayer::ShotBomb()
 {
-	//비행기 모델을 그린 후에 x-축으로 -90도 회전한다. 
-	XMMATRIX mtxRotate = XMMatrixRotationRollPitchYaw(XMConvertToRadians(-90.0f), 0.0f, 0.0f);
-	m_xmf4x4World = Matrix4x4::Multiply(mtxRotate, m_xmf4x4World);
+	bool isTrue = false;
+	if (m_iBombNum > 0 && m_bShotBomb && m_fBombCooltime < 0) {
+		--m_iBombNum;
+		isTrue = true;
+		m_fBombCooltime = m_fBombInitCooltime;
+	}
+	m_bShotBomb = false;
+
+	return isTrue;
+
 }
 
 CCamera *CAirplanePlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
@@ -350,3 +350,68 @@ CCamera *CAirplanePlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 
 	return(m_pCamera);
 }
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// CAirplanePlayer
+
+CAirplanePlayer::CAirplanePlayer(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList
+	*pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature)
+{
+	//비행기 메쉬를 생성한다. 
+	CMesh *pAirplaneMesh = new CAirplaneMeshDiffused(pd3dDevice, pd3dCommandList, 6.0f, 6.0f, 1.0f, XMFLOAT4(0.0f, 0.5f, 0.0f, 0.0f));
+
+	m_pBulletMesh = new CCubeMesh(pd3dDevice, pd3dCommandList, 1.0f, 1.0f, 1.0f, XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f));
+	m_pBulletShader = new CObjectsShader();
+	m_pBulletShader->CreateShader(pd3dDevice, pd3dGraphicsRootSignature);
+	m_pBulletShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
+
+	SetMesh(pAirplaneMesh);
+
+	//플레이어의 카메라를 스페이스쉽 카메라로 변경(생성)한다. 
+	m_pCamera = ChangeCamera(THIRD_PERSON_CAMERA, 0.0f);
+	//플레이어를 위한 셰이더 변수를 생성한다. 
+	CreateShaderVariables(pd3dDevice, pd3dCommandList);
+
+	//플레이어의 위치를 설정한다. 
+	SetPosition(XMFLOAT3(0.0f, 0.0f, 10.0f));
+
+
+
+	//플레이어(비행기) 메쉬를 렌더링할 때 사용할 셰이더를 생성한다.
+	CPlayerShader *pShader = new CPlayerShader();
+	pShader->CreateShader(pd3dDevice, pd3dGraphicsRootSignature);
+	pShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
+	SetShader(pShader);
+}
+
+CAirplanePlayer::~CAirplanePlayer()
+{
+}
+
+void CAirplanePlayer::OnPrepareRender()
+{
+	m_xmf4x4World._11 = m_xmf3Right.x;
+	m_xmf4x4World._12 = m_xmf3Right.y;
+	m_xmf4x4World._13 = m_xmf3Right.z;
+	m_xmf4x4World._21 = m_xmf3Up.x;
+	m_xmf4x4World._22 = m_xmf3Up.y;
+	m_xmf4x4World._23 = m_xmf3Up.z;
+	m_xmf4x4World._31 = m_xmf3Look.x;
+	m_xmf4x4World._32 = m_xmf3Look.y;
+	m_xmf4x4World._33 = m_xmf3Look.z;
+	m_xmf4x4World._41 = m_xmf3Position.x;
+	m_xmf4x4World._42 = m_xmf3Position.y;
+	m_xmf4x4World._43 = m_xmf3Position.z;
+
+	//비행기 모델을 그리기 전에 x-축으로 90도 회전한다. 
+	XMMATRIX mtxRotate = XMMatrixRotationRollPitchYaw(XMConvertToRadians(90.0f), 0.0f, 0.0f);
+	m_xmf4x4World = Matrix4x4::Multiply(mtxRotate, m_xmf4x4World);
+}
+
+void CAirplanePlayer::OnPostRender()
+{
+	//비행기 모델을 그린 후에 x-축으로 -90도 회전한다. 
+	XMMATRIX mtxRotate = XMMatrixRotationRollPitchYaw(XMConvertToRadians(-90.0f), 0.0f, 0.0f);
+	m_xmf4x4World = Matrix4x4::Multiply(mtxRotate, m_xmf4x4World);
+}
+
